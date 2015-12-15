@@ -14,31 +14,32 @@
 
 namespace rt {
 
-Vector Tracer::trace(Scene &scene, const Ray &ray, int depth) {
-	Intersection inter = scene.intersect(ray);
+Vector PathTracer::trace(Scene *scene, const Ray &ray, int depth) {
+	Intersection inter = scene->intersect(ray);
 	if (!inter.object) {
 		return Vector::Zero;
 	} else {
 		int  new_depth = depth + 1;
 		bool is_max_depth = new_depth >= _max_depth;
 		Object *object = inter.object;
-		Phong  &material = object->material;
+		Phong *material = static_cast<Phong *>(object->material);
+
 		bool isUseRR = new_depth > 5;
-		bool isRR = isUseRR && (*_rng)() < material.color_max;
+		bool isRR = isUseRR && _rng->get() < material->color_max;
 
 		if (is_max_depth || (isUseRR && !isRR)) {
-			return material.emission;
+			return material->emission;
 		}
 
 		Vector norm = inter.norm;
 		Vector pos  = inter.position;
 		Vector abs_norm = (dot(norm, ray.direct) < 0) ? norm : norm * -1;
 
-		Vector f = (isUseRR && isRR) ? material.c_color : material.color;
+		Vector f = (isUseRR && isRR) ? material->c_color : material->color;
 
-		if (material.reflect_type == REFL_DIFF) {
-			double r1 = 2 * PI * (*_rng)();
-			double r2 = (*_rng)();
+		if (material->reflect_type == REFL_DIFF) {
+			double r1 = 2 * PI * _rng->get();
+			double r2 = _rng->get();
 			double r2s = sqrt(r2);
 
 			Vector w = abs_norm;
@@ -46,10 +47,10 @@ Vector Tracer::trace(Scene &scene, const Ray &ray, int depth) {
 			Vector u = cross(wo, w).norm();
 			Vector v = cross(w, u);
 			Vector d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).norm();
-			return material.emission + f * trace(scene, Ray(pos, d), new_depth);
-		} else if (material.reflect_type == REFL_SPEC) {
+			return material->emission + f * trace(scene, Ray(pos, d), new_depth);
+		} else if (material->reflect_type == REFL_SPEC) {
 			Vector d = ray.direct - norm * 2 * dot(norm, ray.direct);
-			return material.emission + f * trace(scene, Ray(pos, d), new_depth);
+			return material->emission + f * trace(scene, Ray(pos, d), new_depth);
 		}
 		// bool use_reflection = new_depth > 5;
 		// bool is_reflection = use_reflection && _rng() < obj->max_color;

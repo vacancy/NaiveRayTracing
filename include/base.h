@@ -7,8 +7,8 @@
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_VECTOR_H_
-#define _INCLUDE_VECTOR_H_
+#ifndef _INCLUDE_BASE_H_
+#define _INCLUDE_BASE_H_
 
 #include <cmath>
 #include <iostream>

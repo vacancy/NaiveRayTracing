@@ -7,22 +7,25 @@
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_VECTOR_H_
-#define _INCLUDE_VECTOR_H_
+#ifndef _INCLUDE_RANDOM_H_
+#define _INCLUDE_RANDOM_H_
 
 namespace rt {
 
 class RandomStream {
+protected:
 	unsigned seed;
 };
 
-class LCGStream : RandomStream {
+class LCGStream : public RandomStream {
 public:
-	LCGStream(unsigned s = 0) : seed(s) {}
+	LCGStream(unsigned s = 0) {
+		seed = s;
+	}
 
 	inline double get() {
 		seed = 214013u * seed + 2531011u;
-		return seed *  (1.0 / 4294967296.0)
+		return seed *  (1.0 / 4294967296.0);
 	}
 };
 

@@ -7,8 +7,8 @@
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_OBJECT_H_
-#define _INCLUDE_OBJECT_H_
+#ifndef _INCLUDE_MATERIAL_H_
+#define _INCLUDE_MATERIAL_H_
 
 #include "base.h"
 #include <cmath>
@@ -23,13 +23,11 @@ enum REFLECT_T {
 	REFL_REFR
 };
 
-class Material;
-class Phong;
-
 class Material {
+
 };
 
-class Phong : Material {
+class Phong : public Material {
 public:
 	REFLECT_T reflect_type;
 	Vector emission, color, c_color;

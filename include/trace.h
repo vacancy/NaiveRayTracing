@@ -11,6 +11,7 @@
 #define _INCLUDE_TRACE_H_
 
 #include "base.h"
+#include "random.h"
 
 namespace rt {
 
@@ -18,15 +19,15 @@ class Tracer {
 
 };
 
-class PathTracer:Tracer {
+class PathTracer : public Tracer {
 public:
-	Tracer(int max_depth = 10, unsigned seed = 19961018) {
-		_rng = new RandomLCG(seed);
+	PathTracer(int max_depth = 10, unsigned seed = 19961018) {
+		_rng = new LCGStream(seed);
 		_max_depth = max_depth;
 	}
 	Vector trace(Scene *scene, const Ray &ray, int depth);
-private:
-	RandomLCG *_rng;
+protected:
+	LCGStream *_rng;
 	int _max_depth;
 };
 

@@ -10,6 +10,7 @@
 #include "../include/base.h"
 #include "../include/canvas.h"
 #include "../include/object.h"
+#include "../include/material.h"
 #include "../include/camera.h"
 #include "../include/trace.h"
 #include <iostream>
@@ -42,12 +43,12 @@ int main(int argc, char *argv[]) {
 	obj7->set_material(new Phong(REFL_DIFF, Vector(.25,.25,.25),      Vector::Zero))->add_to_scene(scene);
 	lite->set_material(new Phong(REFL_DIFF, Vector::Zero, Vector(100, 100, 100)))->add_to_scene(scene);
 
-	PathTracer *tracer = new PathTracer(100);
+	PathTracer *tracer = new PathTracer(10);
 	FILE *df = fopen("debug.txt", "w");
 
 	const int SAMPLE_X = 2;
 	const int SAMPLE_Y = 2;
-	const int SAMPLE = 1000;
+	const int SAMPLE = 100;
 	const int SAMPLE_XY = SAMPLE_X * SAMPLE_Y;
 	const int SAMPLE_ALL = SAMPLE*SAMPLE_XY;
 	#pragma omp parallel for schedule(dynamic, 1)

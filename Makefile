@@ -22,8 +22,8 @@ BIN_TARGET = $(BIN_DIR)/$(TARGET)
 INCLUDE_DIR = -I $(SRC_DIR) -I $(SRC_DIR)/include -I $(INC_DIR)
 
 
-# CXXFLAGS = -O2 -w
-CXXFLAGS = -O3 -w -fopenmp
+CXXFLAGS = -O3 -w
+# CXXFLAGS = -O3 -w -fopenmp
 # CXXFLAGS = -g
 # CXXFLAGS = -pg
 

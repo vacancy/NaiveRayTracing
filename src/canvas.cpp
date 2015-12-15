@@ -12,6 +12,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <string>
+
 #include "../include/canvas.h"
 
 namespace rt {
@@ -27,7 +28,7 @@ void Canvas::write(const std::string &filename) {
 	cv::imwrite(filename, res);
 }
 
-cv2::Mat Canvas::_to_mat(void) {
+cv::Mat Canvas::_to_mat(void) {
 	assert(c == 3);
 	cv::Mat res(h, w, CV_8UC3);
 	for (int i = 0; i < h; ++i) {

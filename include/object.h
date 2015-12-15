@@ -19,9 +19,10 @@
 
 namespace rt {
 
-class Object;
 class Intersection;
 class Ray;
+class Object;
+class Scene;
 
 class Ray {
 public:
@@ -53,16 +54,28 @@ public:
 	const static Intersection null;
 };
 
+class Scene {
+public:
+	std::vector<Object *> objects;
+	Scene(void) {}
+
+	inline Scene *add(Object *obj) {
+		objects.push_back(obj);
+		return this;
+	}
+	Intersection intersect(const Ray &ray);
+};
+
 class Object {
 public:
 	Material *material;
 
 	virtual Intersection intersect(const Ray &ray) { return Intersection::null; }
-	inline Object *set_material(const Material *m) {
+	inline Object *set_material(Material *m) {
 		material = m;
 		return this;
 	}
-	inline Object *add_to_scene(const Scene *s) {
+	inline Object *add_to_scene(Scene *s) {
 		s->add(this);
 		return this;
 	}
@@ -137,18 +150,6 @@ public:
 		d = -dot(point, norm);
 	}
 
-	Intersection intersect(const Ray &ray);
-};
-
-class Scene {
-public:
-	std::vector<Object *> objects;
-	Scene(void) {}
-
-	inline Scene *add(Object *obj) {
-		objects.push_back(obj);
-		return this;
-	}
 	Intersection intersect(const Ray &ray);
 };
 

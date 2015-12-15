@@ -41,7 +41,7 @@ public:
 	void write(const std::string &);
 
 protected:
-	cv2::Mat _to_mat(void);
+	cv::Mat _to_mat(void);
 };
 
 } // end namespace rt
