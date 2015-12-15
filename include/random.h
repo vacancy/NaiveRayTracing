@@ -13,6 +13,8 @@
 namespace rt {
 
 class RandomStream {
+public:
+	virtual double get() = 0;
 protected:
 	unsigned seed;
 };
