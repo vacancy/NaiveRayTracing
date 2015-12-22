@@ -20,9 +20,9 @@ using namespace rt;
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	int h = 512, w = 512;
+	int h = 128, w = 128;
 	Canvas *canvas = new Canvas(h, w, 3);
-	Camera *camera = new PerspectiveCamera(Vector(0, 5, 10), Vector(0, 0, -1), Vector(0, 1, 0), 90); 
+	Camera *camera = new PerspectiveCamera(Vector(0, 5+0.5, 10), Vector(0, -0.1, -1).norm(), Vector(0, 1, 0), 90); 
 	Scene *scene   = new Scene;
 
 	Object *obj1 = new Sphere(Vector(-6, 0, -10), 5);
@@ -32,23 +32,23 @@ int main(int argc, char *argv[]) {
 	Object *obj5 = new Plane(Vector(20, 0, 0), Vector(-1, 0, 0));
 	Object *obj6 = new Plane(Vector(0, 0, -20), Vector(0, 0, 1));
 	Object *obj7 = new Plane(Vector(0, 20, 0), Vector(0, -1, 0));
-	Object *lite = new Sphere(Vector(0,600+20-.01,-10), 600);
+	Object *lite = new Sphere(Vector(0,600+20-.03,-10), 600);
 
 	obj1->set_material(new Phong(REFL_SPEC, Vector(.999, .999, .999), Vector::Zero))->add_to_scene(scene);
-	obj2->set_material(new Phong(REFL_SPEC, Vector(.999, .999, .999), Vector::Zero))->add_to_scene(scene);
+	obj2->set_material(new Phong(REFL_SPEC, Vector(.999, .999, .999), Vector(0.1, 0.1, 0.1)))->add_to_scene(scene);
 	obj3->set_material(new Phong(REFL_DIFF, Vector(.75,.75,.75),      Vector::Zero))->add_to_scene(scene);
 	obj4->set_material(new Phong(REFL_DIFF, Vector(.75,.25,.25),      Vector::Zero))->add_to_scene(scene);
 	obj5->set_material(new Phong(REFL_DIFF, Vector(.25,.25,.75),      Vector::Zero))->add_to_scene(scene);
 	obj6->set_material(new Phong(REFL_DIFF, Vector(.25,.25,.25),      Vector::Zero))->add_to_scene(scene);
 	obj7->set_material(new Phong(REFL_DIFF, Vector(.25,.25,.25),      Vector::Zero))->add_to_scene(scene);
-	lite->set_material(new Phong(REFL_DIFF, Vector::Zero, Vector(100, 100, 100)))->add_to_scene(scene);
+	lite->set_material(new Phong(REFL_DIFF, Vector::Zero,             Vector(12, 12, 12)))->add_to_scene(scene);
 
-	PathTracer *tracer = new PathTracer(10);
+	PathTracer *tracer = new PathTracer(100);
 	FILE *df = fopen("debug.txt", "w");
 
 	const int SAMPLE_X = 2;
 	const int SAMPLE_Y = 2;
-	const int SAMPLE = 100;
+	const int SAMPLE = 25;
 	const int SAMPLE_XY = SAMPLE_X * SAMPLE_Y;
 	const int SAMPLE_ALL = SAMPLE*SAMPLE_XY;
 	#pragma omp parallel for schedule(dynamic, 1)
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 					Vector sub_color = Vector::Zero;
 					for (int k = 0; k < SAMPLE; ++k) {
 						Vector tmp = tracer->trace(scene, ray, 0);
-						sub_color = sub_color + tmp / double(SAMPLE_ALL);
+						sub_color = sub_color + tmp / double(SAMPLE);
 					}
 					color = color + Vector(
 						clamp_int(sub_color.x),

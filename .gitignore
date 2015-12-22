@@ -1,5 +1,6 @@
 .DS_Store
 *.txt
+*.bmp
 bin/
 obj/
 test/
