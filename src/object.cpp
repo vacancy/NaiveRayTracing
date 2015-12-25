@@ -7,7 +7,6 @@
  * ``Advanced Computational Geometry''.
  **/
 
-#include "../include/base.h"
 #include "../include/object.h"
 #include <iostream>
 #include <algorithm>
@@ -34,34 +33,56 @@ inline static bool _in_triangle(const Vector &p, const Triangle &t) {
 
 Intersection Triangle::intersect(const Ray &ray) {
 	double t = -(d + dot(norm, ray.origin)) / (dot(norm, ray.direct) + eps);
-	Vector point = ray.get(t);
-	bool inter = _in_triangle(point, *this);
-	if (inter) {
-		Intersection res;
-		res.object = static_cast<Object *>(this);
-		res.distance = t;
-		res.position = point;
-		res.norm = norm;
-		return res;
+	if (t > bigeps) {
+		Vector point = ray.get(t);
+		bool inter = _in_triangle(point, *this);
+		if (inter) {
+			Intersection res;
+			res.object = static_cast<Object *>(this);
+			res.distance = t;
+			res.position = point;
+			res.norm = norm;
+			return res;
+		}
 	}
 	return Intersection::null;
 }
 
 Intersection Sphere::intersect(const Ray &ray) {
-	Vector v = ray.origin - center;
-	double a0 = v.len2() - sqrrad;
-	double dv = dot(ray.direct, v);
-	if (dv <= eps) {
-		double discr = sqr(dv) - a0;
-		if (discr > eps) {
+	Vector v = center - ray.origin;
+	double b = dot(v, ray.direct);
+	double det = b*b - v.len2() + sqrrad;
+	if (det > 0) {
+		double sdet = sqrt(det);
+		double distance = 0;
+		if (b - sdet > bigeps)
+			distance = b - sdet;
+		else if (b + sdet > bigeps)
+			distance = b + sdet;
+		if (distance > bigeps) {
 			Intersection res;
 			res.object = static_cast<Object *>(this);
-			res.distance = -dv - sqrt(discr);
-			res.position = ray.get(res.distance);
+			res.distance = distance;
+			res.position = ray.get(distance);
 			res.norm = (res.position - center).norm();
 			return res;
 		}
 	}
+
+	// Vector v = ray.origin - center;
+	// double a0 = v.len2() - sqrrad;
+	// double dv = dot(ray.direct, v);
+	// if (dv <= -eps) {
+	// 	double discr = sqr(dv) - a0;
+	// 	if (discr > eps) {
+	// 		Intersection res;
+	// 		res.object = static_cast<Object *>(this);
+	// 		res.distance = -dv - sqrt(discr);
+	// 		res.position = ray.get(res.distance);
+	// 		res.norm = (res.position - center).norm();
+	// 		return res;
+	// 	}
+	// }
 
 	return Intersection::null;
 }

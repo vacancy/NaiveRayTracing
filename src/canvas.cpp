@@ -7,13 +7,12 @@
  * ``Advanced Computational Geometry''.
  **/
 
+#include "../include/canvas.h"
 #include <cassert>
 #include <cstdio>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <string>
-
-#include "../include/canvas.h"
 
 namespace rt {
 

@@ -21,7 +21,7 @@ protected:
 
 class LCGStream : public RandomStream {
 public:
-	LCGStream(unsigned s = 0) {
+	LCGStream(unsigned s = 12345) {
 		seed = s;
 	}
 

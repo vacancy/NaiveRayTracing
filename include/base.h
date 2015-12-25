@@ -17,8 +17,9 @@ namespace rt {
 
 const double PI = 3.14159265358979323;
 const double eps = 1e-6;
+const double bigeps = 1e-4;
 
-inline double sqr(const double &x) {
+inline double sqr(const double x) {
 	return x*x;
 }
 

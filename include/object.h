@@ -102,18 +102,16 @@ public:
 		initialize();
 	}
 	inline void initialize(void) {
-		#define tri_eps 1e-4
 		norm = cross(b-a, c-a).norm();
 		nnorm = -norm;
 		center = (a + b + c) / 3;
 		d = -dot(norm, a);
-		minx = std::min(a.x, std::min(b.x, c.x))-tri_eps,
-		maxx = std::max(a.x, std::max(b.x, c.x))+tri_eps;
-		miny = std::min(a.y, std::min(b.y, c.y))-tri_eps,
-		maxy = std::max(a.y, std::max(b.y, c.y))+tri_eps;
-		minz = std::min(a.z, std::min(b.z, c.z))-tri_eps,
-		maxz = std::max(a.z, std::max(b.z, c.z))+tri_eps;
-		#undef tri_eps
+		minx = std::min(a.x, std::min(b.x, c.x))-bigeps,
+		maxx = std::max(a.x, std::max(b.x, c.x))+bigeps;
+		miny = std::min(a.y, std::min(b.y, c.y))-bigeps,
+		maxy = std::max(a.y, std::max(b.y, c.y))+bigeps;
+		minz = std::min(a.z, std::min(b.z, c.z))-bigeps,
+		maxz = std::max(a.z, std::max(b.z, c.z))+bigeps;
 	}
 
 	Intersection intersect(const Ray &ray);
