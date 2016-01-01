@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     Scene *scene4 = new Scene;
     if (SCENE_ID == 4) {
         ObjReader *reader = new ObjReader("fixed.perfect.dragon.100K.0.07.obj");
-        TriangleMesh *dragon = reader->process(new Phong(REFL_REFR, Vector(0.5, 0.5, 0.5), Vector::Zero));
+        TriangleMesh *dragon = reader->process(new Phong(REFL_REFR, Vector(0.9, 0.9, 0.9), Vector::Zero));
         ObjKDTree *dragon_kd = new ObjKDTree(dragon);
         dragon_kd->add_to_scene(scene4);
         //dragon->add_to_scene(scene4);
