@@ -17,9 +17,9 @@ const Vector Vector::YAxis(0, 1, 0);
 const Vector Vector::ZAxis(0, 0, 1);
 
 // {{{ Begin output operations
-std::ostream &operator <<(std::ostream &os, const Vector &vec) {
-	os << "Vector(" << vec.x << " " << vec.y << " " << vec.z << ")";
-	return os;
+std::ostream &operator<<(std::ostream &os, const Vector &vec) {
+    os << "Vector(" << vec.x << " " << vec.y << " " << vec.z << ")";
+    return os;
 }
 // }}} End output Operations
 

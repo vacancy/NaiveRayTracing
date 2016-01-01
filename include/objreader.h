@@ -12,18 +12,24 @@
 
 #include "object.h"
 #include <string>
+#include <vector>
 
 namespace rt {
 
+class ObjKDTree;
+
 class ObjReader {
+    friend class ObjKDTree;
+
 public:
-	ObjReader(std::string filename) {
-		_filename = filename;
-	}
-	void process(Scene *scene, Material *material);
+    ObjReader(std::string filename = "") : _filename(filename) {
+
+    }
+
+    TriangleMesh *process(Material *material);
 
 protected:
-	std::string _filename;
+    std::string _filename;
 };
 
 } // end namespace rt

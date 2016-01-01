@@ -12,92 +12,137 @@
 
 #include <cmath>
 #include <iostream>
+#include <utility>
 
 namespace rt {
 
 const double PI = 3.14159265358979323;
 const double eps = 1e-6;
 const double bigeps = 1e-4;
+const double inf = 1e20;
 
 inline double sqr(const double x) {
-	return x*x;
+    return x * x;
 }
+
+typedef std::pair<double, double> Pair;
 
 class Vector {
 public:
+    union {
+        struct {
+            double x, y, z;
+        };
+        struct {
+            double _value[3];
+        };
+    };
 
-	double x, y, z;
-	Vector(void) {}
-	Vector(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
-	//Vector(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
+    Vector(void) { }
 
-	inline double len(void) {
-		return sqrt(x * x + y * y + z * z);
-	}
-	inline double len2(void) {
-		return (x * x + y * y + z * z);
-	}
-	inline Vector norm(void) const {
-		double len_inv = 1.0 / sqrt(x * x + y * y + z * z);
-		return Vector(x*len_inv, y*len_inv, z*len_inv);
-	}
+    Vector(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
+    //Vector(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
 
-	static const Vector Zero;
-	static const Vector XAxis;
-	static const Vector YAxis;
-	static const Vector ZAxis;
+    inline double &operator[](int index) {
+        return _value[index];
+    }
+
+    inline const double &operator[](int index) const {
+        return _value[index];
+    }
+
+    inline double len(void) {
+        return sqrt(x * x + y * y + z * z);
+    }
+
+    inline double len2(void) {
+        return (x * x + y * y + z * z);
+    }
+
+    inline Vector norm(void) const {
+        double len_inv = 1.0 / sqrt(x * x + y * y + z * z);
+        return Vector(x * len_inv, y * len_inv, z * len_inv);
+    }
+
+    inline double min(void) const {
+        return (x < y ? (x < z ? x : z) : (y < z ? y : z));
+    }
+
+    inline double max(void) const {
+        return (x > y ? (x > z ? x : z) : (y > z ? y : z));
+    }
+
+    static const Vector Zero;
+    static const Vector XAxis;
+    static const Vector YAxis;
+    static const Vector ZAxis;
 };
 
 // {{{ Begin vector operations
 inline double dot(const Vector &op0, const Vector &op1) {
-	return op0.x*op1.x + op0.y*op1.y + op0.z*op1.z;
+    return op0.x * op1.x + op0.y * op1.y + op0.z * op1.z;
 }
+
 inline Vector cross(const Vector &op0, const Vector &op1) {
-	return Vector(
-		op0.y * op1.z - op0.z * op1.y, 
-		op0.z * op1.x - op0.x * op1.z,
-		op0.x * op1.y - op0.y * op1.x
-	);
+    return Vector(
+            op0.y * op1.z - op0.z * op1.y,
+            op0.z * op1.x - op0.x * op1.z,
+            op0.x * op1.y - op0.y * op1.x
+    );
 }
-inline Vector operator +(const Vector &op0, const Vector &op1) {
-	return Vector(op0.x + op1.x, op0.y + op1.y, op0.z + op1.z);
+
+inline Vector operator+(const Vector &op0, const Vector &op1) {
+    return Vector(op0.x + op1.x, op0.y + op1.y, op0.z + op1.z);
 }
-inline Vector operator -(const Vector &op0, const Vector &op1) {
-	return Vector(op0.x - op1.x, op0.y - op1.y, op0.z - op1.z);
+
+inline Vector operator-(const Vector &op0, const Vector &op1) {
+    return Vector(op0.x - op1.x, op0.y - op1.y, op0.z - op1.z);
 }
-inline Vector operator +(const Vector &op0, const double &op1) {
-	return Vector(op0.x + op1, op0.y + op1, op0.z + op1);
+
+inline Vector operator+(const Vector &op0, const double &op1) {
+    return Vector(op0.x + op1, op0.y + op1, op0.z + op1);
 }
-inline Vector operator -(const Vector &op0, const double &op1) {
-	return Vector(op0.x - op1, op0.y - op1, op0.z - op1);
+
+inline Vector operator-(const Vector &op0, const double &op1) {
+    return Vector(op0.x - op1, op0.y - op1, op0.z - op1);
 }
-inline Vector operator -(const Vector &op0) {
-	return Vector(-op0.x, -op0.y, -op0.z);
+
+inline Vector operator-(const Vector &op0) {
+    return Vector(-op0.x, -op0.y, -op0.z);
 }
-inline Vector operator *(const Vector &op0, const Vector &op1) {
-	return Vector(op0.x * op1.x, op0.y * op1.y, op0.z * op1.z);
+
+inline Vector operator*(const Vector &op0, const Vector &op1) {
+    return Vector(op0.x * op1.x, op0.y * op1.y, op0.z * op1.z);
 }
-inline Vector operator *(const Vector &op0, const double &op1) {
-	return Vector(op0.x * op1, op0.y * op1, op0.z * op1);
+
+inline Vector operator*(const Vector &op0, const double &op1) {
+    return Vector(op0.x * op1, op0.y * op1, op0.z * op1);
 }
-inline Vector operator *(const double &op0, const Vector &op1) {
-	return Vector(op1.x * op0, op1.y * op0, op1.z * op0);
+
+inline Vector operator*(const double &op0, const Vector &op1) {
+    return Vector(op1.x * op0, op1.y * op0, op1.z * op0);
 }
-inline Vector operator /(const Vector &op0, const double &op1) {
-	return Vector(op0.x / op1, op0.y / op1, op0.z / op1);
+
+inline Vector operator/(const Vector &op0, const double &op1) {
+    return Vector(op0.x / op1, op0.y / op1, op0.z / op1);
+}
+
+inline Vector operator/(const Vector &op0, const Vector &op1) {
+    return Vector(op0.x / op1.x, op0.y / op1.y, op0.z / op1.z);
 }
 // }}} End vector operations
 
-inline double clamp(double x) { 
-	if (x < 0) return 0;
-	else if (x > 1) return 1;
-	else return x;
+inline double clamp(double x) {
+    if (x < 0) return 0;
+    else if (x > 1) return 1;
+    else return x;
 }
 
 inline double clamp_int(double x) {
-	return int(pow(clamp(x), 1 / 2.2) * 255 + .5);
+    return int(pow(clamp(x), 1 / 2.2) * 255 + .5);
 }
-std::ostream &operator <<(std::ostream &os, const Vector &vec);
+
+std::ostream &operator<<(std::ostream &os, const Vector &vec);
 
 } // end namespace rt
 

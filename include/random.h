@@ -14,21 +14,22 @@ namespace rt {
 
 class RandomStream {
 public:
-	virtual double get() = 0;
+    virtual double get() = 0;
+
 protected:
-	unsigned seed;
+    unsigned seed;
 };
 
 class LCGStream : public RandomStream {
 public:
-	LCGStream(unsigned s = 12345) {
-		seed = s;
-	}
+    LCGStream(unsigned s = 12345) {
+        seed = s;
+    }
 
-	inline double get() {
-		seed = 214013u * seed + 2531011u;
-		return seed *  (1.0 / 4294967296.0);
-	}
+    inline double get() {
+        seed = 214013u * seed + 2531011u;
+        return seed * (1.0 / 4294967296.0);
+    }
 };
 
 } // end namespace rt

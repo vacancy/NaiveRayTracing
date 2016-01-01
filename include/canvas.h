@@ -20,28 +20,32 @@ typedef unsigned char uint8;
 
 class Canvas {
 public:
-	uint8 *mat;
-	int h, w, c;
-	int st0, st1, size;
+    uint8 *mat;
+    int h, w, c;
+    int st0, st1, size;
 
-	Canvas(void) {}
-	Canvas(int h_, int w_, int c_) : h(h_), w(w_), c(c_) {
-		mat = new uint8[h_*w_*c_];
-		st1 = c, st0 = c*w, size = c*w*h;
-		memset(mat, 0, size*sizeof(uint8));
-	}
-	inline uint8 &get(int x, int y, int c=0) {
-		return mat[x*st0 + y*st1 + c];
-	}
-	inline void set(int x, int y, int c, int v) {
-		mat[x*st0 + y*st1 + c] = v;
-	}
+    Canvas(void) { }
 
-	void show(void);
-	void write(const std::string &);
+    Canvas(int h_, int w_, int c_) : h(h_), w(w_), c(c_) {
+        mat = new uint8[h_ * w_ * c_];
+        st1 = c, st0 = c * w, size = c * w * h;
+        memset(mat, 0, size * sizeof(uint8));
+    }
+
+    inline uint8 &get(int x, int y, int c = 0) {
+        return mat[x * st0 + y * st1 + c];
+    }
+
+    inline void set(int x, int y, int c, uint8 v) {
+        mat[x * st0 + y * st1 + c] = v;
+    }
+
+    void show(void);
+
+    void write(const std::string &);
 
 protected:
-	cv::Mat _to_mat(void);
+    cv::Mat _to_mat(void);
 };
 
 } // end namespace rt
