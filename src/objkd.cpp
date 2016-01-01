@@ -61,10 +61,6 @@ void ObjKDTree::_build(ObjKDNode *&root, const vector<Triangle *> a, BoundingBox
     }
 }
 
-void ObjKDTree::initialize() {
-    _build(root, wrapper->_triangles, wrapper->_bbox, 0);
-}
-
 Intersection ObjKDTree::_traverse(ObjKDNode *root, const Ray &ray) {
     if (root == NULL)
         return Intersection::null;
@@ -98,20 +94,24 @@ Intersection ObjKDTree::_traverse(ObjKDNode *root, const Ray &ray) {
         if (interl.object != NULL) {
             if (ignored)
                 return interl;
-            if (!swaped && interl.position[axis] < split + bigeps)
+            if (!swaped && interl.position[axis] < split + 1e-9)
                 return interl;
-            if (swaped && interl.position[axis] > split - bigeps)
+            if (swaped && interl.position[axis] > split - 1e-9)
                 return interl;
         }
 
         if (!ignored) {
             Intersection interr = _traverse(rson, ray);
-            if (interr.distance < far + bigeps)
+            if (interr.distance < far + 1e-9)
                 return interr;
         }
     }
 
     return Intersection::null;
+}
+
+void ObjKDTree::initialize() {
+    _build(root, wrapper->_triangles, wrapper->_bbox, 0);
 }
 
 Intersection ObjKDTree::intersect(const Ray &ray) {

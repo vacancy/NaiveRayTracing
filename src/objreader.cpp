@@ -8,7 +8,6 @@
  **/
 
 #include "../include/objreader.h"
-
 #include <fstream>
 
 using std::ifstream;
@@ -32,6 +31,7 @@ TriangleMesh *ObjReader::process(Material *material) {
             char op;
             double x, y, z;
             sscanf(buffer, "%c %lf %lf %lf", &op, &x, &y, &z);
+            x *= 1.4;
             vertexes.push_back(Vector(x, y, z));
         } else if (buffer[0] == 'f') {
             char op;

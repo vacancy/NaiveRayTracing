@@ -14,7 +14,6 @@
 #include "objreader.h"
 #include <vector>
 
-
 namespace rt {
 
 struct ObjKDNode {

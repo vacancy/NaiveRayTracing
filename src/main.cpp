@@ -82,44 +82,42 @@ int main(int argc, char *argv[]) {
     Scene *scene4 = new Scene;
     if (SCENE_ID == 4) {
         ObjReader *reader = new ObjReader("fixed.perfect.dragon.100K.0.07.obj");
-        TriangleMesh *dragon = reader->process(new Phong(REFL_DIFF, Vector(0.5, 0.5, 0.5), Vector::Zero));
+        TriangleMesh *dragon = reader->process(new Phong(REFL_REFR, Vector(0.5, 0.5, 0.5), Vector::Zero));
         ObjKDTree *dragon_kd = new ObjKDTree(dragon);
         dragon_kd->add_to_scene(scene4);
         //dragon->add_to_scene(scene4);
 
-        Object *left = new Sphere(Vector(0, -1e5 - 1.5, 0), 1e5);
-        Object *right = new Sphere(Vector(0, 1e5 + 1.5, 0), 1e5);
-        Object *back = new Sphere(Vector(1e5 + 1.25, 0, 0), 1e5);
-        Object *bottom = new Sphere(Vector(0, 0, -1e5 - 1), 1e5);
-        Object *top = new Sphere(Vector(0, 0, 1e5 + 1), 1e5);
+        Object *left = new Sphere(Vector(-1e5 - 3, 0, 0), 1e5);
+        Object *right = new Sphere(Vector(1e5 + 3, 0, 0), 1e5);
+        Object *back = new Sphere(Vector(0, 0, 1e5 + 1.2), 1e5);
+        Object *bottom = new Sphere(Vector(0, -1e5 - 1, 0), 1e5);
+        Object *top = new Sphere(Vector(0, 1e5 + 2.5, 0), 1e5);
         left->set_material(new Phong(REFL_DIFF, Vector(.75, .75, .25), Vector::Zero))->add_to_scene(scene4);
         right->set_material(new Phong(REFL_DIFF, Vector(.25, .75, .75), Vector::Zero))->add_to_scene(scene4);
         back->set_material(new Phong(REFL_DIFF, Vector(.75, .75, .75), Vector::Zero))->add_to_scene(scene4);
         bottom->set_material(new Phong(REFL_DIFF, Vector(.75, .75, .75), Vector(0.5, 0.5, 0.5)))->add_to_scene(scene4);
-        top->set_material(new Phong(REFL_DIFF, Vector(.75, .75, .75), Vector(1.0, 1.0, 1.0)))->add_to_scene(scene4);
+        top->set_material(new Phong(REFL_DIFF, Vector(.75, .75, .75), Vector(0.5, 0.5, 0.5)))->add_to_scene(scene4);
     }
 
     Canvas *canvas = new Canvas(h, w, 3);
     Camera *camera1 = new PerspectiveCamera(Vector(-100, -5, 30), Vector(1, 0, -0.2).norm(), Vector(0, 0, 1), 90);
     Camera *camera3 = new PerspectiveCamera(Vector(-100, -5, 30), Vector(1, 0, -0.2).norm(), Vector(0, 0, 1), 90);
-    Camera *camera4 = new PerspectiveCamera(Vector(-2.5, 0, 0), Vector(1, 0, 0).norm(), Vector(0, 0, 1), 90);
+    Camera *camera4 = new PerspectiveCamera(Vector(0, 0, -1.25), Vector(0, 0, 1).norm(), Vector(0, 1, 0), 120);
 
     if (SCENE_ID == 3) {
-        //PathTraceRender *render = new PathTraceRender(scene3, MAX_DEPTH);
-        //render->render(camera3, canvas);
-        DepthRender *render = new DepthRender(scene3, 100);
+        PathTraceRender *render = new PathTraceRender(scene3, MAX_DEPTH);
         render->render(camera3, canvas);
+        //DepthRender *render = new DepthRender(scene3, 100);
+        //render->render(camera3, canvas);
     } else if (SCENE_ID == 4) {
-        // PathTraceRender *render = new PathTraceRender(scene4, MAX_DEPTH);
-        // render->render(camera4, canvas);
-        DepthRender *render = new DepthRender(scene4, 1);
+        PathTraceRender *render = new PathTraceRender(scene4, MAX_DEPTH);
         render->render(camera4, canvas);
+        //DepthRender *render = new DepthRender(scene4, 1);
+        //render->render(camera4, canvas);
     }
-    //DepthRender *render = new DepthRender(scene4, 2);
-    //render->render(camera1, canvas);
 
     canvas->write("result.bmp");
-    //canvas->show();
+    canvas->show();
 
     return 0;
 }

@@ -8,8 +8,6 @@
  **/
 
 #include "../include/object.h"
-#include <algorithm>
-#include <vector>
 #include <iostream>
 
 using std::vector;
@@ -35,6 +33,7 @@ Intersection Scene::intersect(const Ray &ray) {
     return res;
 }
 
+// {{{ Begin triangle intersection
 inline static bool _sameside(const Vector &a, const Vector &b, const Vector &c, const Vector &p) {
     Vector ab = b - a, ac = c - a, ap = p - a;
     Vector v1 = cross(ab, ac);
@@ -43,7 +42,6 @@ inline static bool _sameside(const Vector &a, const Vector &b, const Vector &c, 
 }
 
 inline static bool _in_triangle(const Vector &p, const Triangle &t) {
-    //cout << p << " " << Vector(t.minx, t.miny, t.minz) << " " << Vector(t.maxx, t.maxy, t.maxz) << endl;
     return _sameside(t.a, t.b, t.c, p) &&
            _sameside(t.b, t.c, t.a, p) &&
            _sameside(t.c, t.a, t.b, p);
@@ -75,21 +73,15 @@ Intersection TriangleMesh::intersect(const Ray &ray) {
     for (Triangle *triangle : _triangles) {
         Intersection tmp = triangle->intersect(ray);
         if (tmp.object != NULL) {
-            if (res.object == NULL || res.distance > tmp.distance) {
-//                if (tmp.distance < 10) {
-//                    cout << "Intersect with big object (triangle subpart): " << tmp.distance << endl;
-//                    cout << *triangle << endl;
-//                    cout << ray.origin << " " << ray.direct << endl;
-//                    Intersection tmp2 = triangle->intersect(ray);
-//                    cout << tmp2.distance << " " << tmp2.position << " " << tmp2.object << endl;
-//                }
+            if (res.object == NULL || res.distance > tmp.distance)
                 res = tmp;
-            }
         }
     }
 
     return res;
 }
+
+// }}} End triangle intersection
 
 Intersection Sphere::intersect(const Ray &ray) {
     Vector v = center - ray.origin;

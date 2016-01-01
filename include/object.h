@@ -93,8 +93,8 @@ public:
     inline Pair get_near_far(const Ray &ray) {
         Vector result_min = vmin - ray.origin;
         Vector result_max = vmax - ray.origin;
-        result_min = result_min / ray.direct;
-        result_max = result_max / ray.direct;
+        result_min = result_min / (ray.direct + eps);
+        result_max = result_max / (ray.direct + eps);
         for (int i = 0; i < 3; ++i)
             if (result_min[i] > result_max[i])
                 std::swap(result_min[i], result_max[i]);

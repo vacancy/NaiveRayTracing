@@ -9,7 +9,6 @@
 
 #include "../include/config.h"
 #include "../include/render.h"
-#include "../include/random.h"
 #include <iostream>
 
 using std::cout;
@@ -67,13 +66,13 @@ Vector PathTraceRender::trace(const Ray &ray, int depth, LCGStream *rng) {
             Vector ans2;
 
             Vector d_refl = ray.direct - norm * 2 * dot(norm, ray.direct);
+            // cout << "refl = " << d_refl << endl;
+
             bool into = dot(norm, abs_norm) > 0;
             double alpha = 1, beta = 1.5;
             double nnt = into ? alpha / beta : beta / alpha;
             double ddn = dot(ray.direct, abs_norm);
             double cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
-
-            // cout << "refl = " << d_refl << endl;
 
             if (cos2t < 0) {
                 Vector res1 = trace(Ray(pos, d_refl), new_depth, rng);
@@ -169,15 +168,6 @@ void DepthRender::render(Camera *camera, Canvas *canvas) {
             double sx = double(x) / w;
             Ray ray = camera->generate(sx, sy);
             Vector color = trace(ray);
-            // for (int i = 0; i < SAMPLE_Y; ++i) {
-            // 	for (int j = 0; j < SAMPLE_X; ++j) {
-            // 		double sy = 1.0 - (double(y) / h + 1.0 / h * i);
-            // 		double sx = double(x) / w + 1.0 / h * j;
-            // 		Ray ray = camera->generate(sx, sy);
-            // 		color = color + trace(ray) / SAMPLE_XY;
-            // 	}
-            // }
-            //cout << color << endl;
             color = color * _norm;
             canvas->set(y, x, 0, clamp_int(color.x));
             canvas->set(y, x, 1, clamp_int(color.y));
