@@ -38,7 +38,6 @@ void ObjKDTree::_build(ObjKDNode *&root, const vector<Triangle *> a, BoundingBox
 
     size_t n = a.size();
     if (n <= _max_leaf_size) {
-        root->is_leaf = true;
         root->mesh = TriangleMesh(a, bbox);
     } else {
         root->axis = current;
@@ -65,7 +64,7 @@ Intersection ObjKDTree::_traverse(ObjKDNode *root, const Ray &ray) {
     if (root == NULL)
         return Intersection::null;
 
-    if (root->is_leaf) {
+    if (root->is_leaf()) {
         return root->mesh.intersect(ray);
     } else {
         ObjKDNode *lson = root->lson;
@@ -119,4 +118,4 @@ Intersection ObjKDTree::intersect(const Ray &ray) {
     return res;
 }
 
-}
+} // End namespace rt

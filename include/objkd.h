@@ -11,24 +11,15 @@
 #define _INCLUDE_OBJECT_KD_H_
 
 #include "base.h"
-#include "objreader.h"
-#include <vector>
+#include "kdbase.h"
 
 namespace rt {
 
-struct ObjKDNode {
-    ObjKDNode(void) : axis(-1), split(inf), lson(NULL), rson(NULL), is_leaf(false) {
+struct ObjKDNode : KDNodeBase<ObjKDNode> {
+    ObjKDNode(void) : KDNodeBase<ObjKDNode>() { }
 
-    }
-
-    int axis;
-    double split;
-    ObjKDNode *lson, *rson;
-
-    BoundingBox bbox;
+    BoundingBox  bbox;
     TriangleMesh mesh;
-
-    bool is_leaf;
 };
 
 class ObjKDTree : public Object {
@@ -40,7 +31,6 @@ public:
     }
 
     void initialize();
-    // void finalize();
 
     virtual Intersection intersect(const Ray &ray);
 
