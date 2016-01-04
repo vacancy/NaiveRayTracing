@@ -12,18 +12,19 @@
 
 #include "base.h"
 #include "kdbase.h"
+#include <vector>
 
 namespace rt {
 
-struct ObjKDNode : KDNodeBase<ObjKDNode> {
-    ObjKDNode(void) : KDNodeBase<ObjKDNode>() { }
-
-    BoundingBox  bbox;
-    TriangleMesh mesh;
-};
-
 class ObjKDTree : public Object {
 public:
+    struct ObjKDNode : KDNodeBase<ObjKDNode> {
+        ObjKDNode(void) : KDNodeBase<ObjKDNode>() { }
+
+        BoundingBox  bbox;
+        TriangleMesh mesh;
+    };
+
     ObjKDTree(TriangleMesh *wrapper, int max_leaf_size = 30)
             : wrapper(wrapper), root(NULL), _max_leaf_size(max_leaf_size) {
 
@@ -38,7 +39,7 @@ public:
     ObjKDNode *root;
 
 protected:
-    void _build(ObjKDNode *&root, const std::vector<Triangle *> a, BoundingBox bbox, int current);
+    void _build(ObjKDNode *&root, const std::vector<Triangle *> &a, BoundingBox bbox, int current);
 
     Intersection _traverse(ObjKDNode *root, const Ray &ray);
 

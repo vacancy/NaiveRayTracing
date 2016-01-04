@@ -34,7 +34,7 @@ public:
             double x, y, z;
         };
         struct {
-            double _value[3];
+            double _values[3];
         };
     };
 
@@ -44,11 +44,11 @@ public:
     //Vector(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
 
     inline double &operator[](int index) {
-        return _value[index];
+        return _values[index];
     }
 
     inline const double &operator[](int index) const {
-        return _value[index];
+        return _values[index];
     }
 
     inline double len(void) {

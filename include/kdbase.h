@@ -35,10 +35,7 @@ template <typename NodeType>
 struct KDCompareBase {
     typedef NodeType node_t;
 
-    KDCompareBase(int axis = -1) : axis(axis) { }
-    virtual bool operator ()(const node_t *A, const node_t *B) const = 0;
-
-    int axis;
+    virtual bool operator ()(const node_t &A, const node_t &B) const = 0;
 };
 
 } // end namespace rt

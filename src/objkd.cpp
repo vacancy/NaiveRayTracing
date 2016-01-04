@@ -28,7 +28,7 @@ inline static int get_triangle_side(const Triangle *triangle, int axis, double s
     return 0;
 }
 
-void ObjKDTree::_build(ObjKDNode *&root, const vector<Triangle *> a, BoundingBox bbox, int current) {
+void ObjKDTree::_build(ObjKDNode *&root, const vector<Triangle *> &a, BoundingBox bbox, int current) {
     if (a.empty()) {
         return;
     }
