@@ -18,24 +18,25 @@ namespace rt {
 
 /**
  * Using CRTP mode to inherit.
- **/ 
-template <typename NodeType>
+ **/
+template <typename NodeType, typename ValueType>
 struct KDNodeBase {
     typedef NodeType node_t;
+    typedef ValueType value_t;
 
-    KDNodeBase(void) : axis(-1), split(inf), lson(NULL), rson(NULL) { }
+    KDNodeBase(void) : axis(-1), split(0), lson(NULL), rson(NULL) { }
     inline bool is_leaf(void) const { return lson == NULL && rson == NULL; }
 
     int axis;
-    double split;
-    node_t *lson, *rson;
+    value_t split;
+    node_t  *lson, *rson;
 };
 
-template <typename NodeType>
+template <typename PtrType>
 struct KDCompareBase {
-    typedef NodeType node_t;
+    typedef PtrType ptr_t;
 
-    virtual bool operator ()(const node_t &A, const node_t &B) const = 0;
+    virtual bool operator ()(const ptr_t &lhs, const ptr_t &rhs) const = 0;
 };
 
 } // end namespace rt

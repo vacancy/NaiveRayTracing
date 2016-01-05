@@ -19,34 +19,48 @@ namespace rt {
 template <typename T>
 class VecKDTree {
 public:
+    typedef typename T::value_t value_t;
     typedef T vector_t;
-    typedef std::vector<vector_t> list_t;
+    typedef T *ptr_vector_t;
+    typedef std::vector<ptr_vector_t> list_t;
+    typedef typename list_t::iterator list_iter_t;
 
-    struct VecKDNode : KDNodeBase<VecKDNode> {
-        VecKDNode(void) : KDNodeBase<VecKDNode>() { }
+    struct VecKDNode : KDNodeBase<VecKDNode, value_t> {
+        VecKDNode(void) : KDNodeBase<VecKDNode, value_t>() { }
         list_t vectors;
     };
 
-    struct VecKDCompare : KDCompareBase<vector_t> {
-        VecKDCompare(int axis = 0) : axis(axis) { std::cout << axis << std::endl; }
-        virtual inline bool operator ()(const vector_t &lhs, const vector_t &rhs) const {
-            return lhs._values[axis] < rhs._values[axis];
+    struct VecKDCompare : KDCompareBase<ptr_vector_t> {
+        VecKDCompare(int axis = 0) : KDCompareBase<ptr_vector_t>(), axis(axis) { }
+        virtual inline bool operator ()(const typename KDCompareBase<ptr_vector_t>::ptr_t &lhs,
+                                        const typename KDCompareBase<ptr_vector_t>::ptr_t &rhs) const {
+            return lhs->_values[axis] < rhs->_values[axis];
         }
 
         int axis;
     };
 
-    VecKDTree(TriangleMesh *wrapper, int max_leaf_size = 30)
+    VecKDTree(const list_t &wrapper, int max_leaf_size = 30)
             : wrapper(wrapper), root(NULL), _max_leaf_size(max_leaf_size) {
 
         initialize();
     }
 
-    inline void initialize() { _build(root, wrapper, 0); }
+    inline void initialize() { _build(root, wrapper.begin(), wrapper.end(), 0); }
 
-    inline list_t find_r(const vector_t center, const double r) {
+    inline list_t find_r(const vector_t &center, const value_t r) {
         list_t res;
         _traverse_r(res, root, center, r*r);
+        return res;
+    }
+
+    inline list_t find_r_bf(const vector_t &center, const value_t r) {
+        list_t res;
+        value_t r2 = r*r;
+        for (auto v : wrapper) {
+            if ((*v - center).l2() < r2)
+                res.push_back(v);
+        }
         return res;
     }
 
@@ -54,8 +68,45 @@ public:
     VecKDNode *root;
 
 protected:
-    void _build(VecKDNode *&root, list_t &a, int current);
-    void _traverse_r(list_t &res, const VecKDNode *root, const vector_t center, const double r2);
+    void _build(VecKDNode *&root, list_iter_t begin, list_iter_t end, int current) {
+        if (begin == end) {
+            return ;
+        }
+
+        root = new VecKDNode();
+
+        size_t n = end - begin;
+        if (n <= _max_leaf_size) {
+            root->vectors = list_t(begin, end);
+        } else {
+            std::nth_element(begin, begin + n/2, end, VecKDCompare(current));
+            root->axis = current;
+            root->split = (*(begin + n/2))->_values[current];
+
+            int next = (current + 1) % 3;
+            _build(root->lson, begin, begin + n/2, next);
+            _build(root->rson, begin + n/2, end, next);
+        }
+    }
+
+    void _traverse_r(list_t &res, const VecKDNode *root, const vector_t &center, const value_t r2) {
+        if (root->is_leaf()) {
+            for (auto v : root->vectors) {
+                if ((*v - center).l2() < r2)
+                    res.push_back(v);
+            }
+        } else {
+            bool in_left = center[root->axis] < root->split;
+            bool ignore = (center[root->axis] - root->split) * (center[root->axis] - root->split) > r2;
+            if (in_left) {
+                _traverse_r(res, root->lson, center, r2);
+                if (!ignore) _traverse_r(res, root->rson, center, r2);
+            } else {
+                _traverse_r(res, root->rson, center, r2);
+                if (!ignore) _traverse_r(res, root->lson, center, r2);
+            }
+        }
+    }
 
 private:
     int _max_leaf_size = 30;
