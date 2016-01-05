@@ -18,8 +18,8 @@ namespace rt {
 
 class ObjKDTree : public Object {
 public:
-    struct ObjKDNode : KDNodeBase<ObjKDNode> {
-        ObjKDNode(void) : KDNodeBase<ObjKDNode>() { }
+    struct ObjKDNode : KDNodeBase<ObjKDNode, double> {
+        ObjKDNode(void) : KDNodeBase<ObjKDNode, double>() { }
 
         BoundingBox  bbox;
         TriangleMesh mesh;

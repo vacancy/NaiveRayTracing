@@ -27,7 +27,7 @@ struct KDNodeBase {
     KDNodeBase(void) : axis(-1), split(0), lson(NULL), rson(NULL) { }
     inline bool is_leaf(void) const { return lson == NULL && rson == NULL; }
 
-    int axis;
+    int     axis;
     value_t split;
     node_t  *lson, *rson;
 };
