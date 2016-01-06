@@ -16,8 +16,8 @@ const int SAMPLE = 25;
 const int SAMPLE_XY = SAMPLE_X * SAMPLE_Y;
 const int SAMPLE_ALL = SAMPLE * SAMPLE_XY;
 
-const int h = 512, w = 512;
-const int MAX_DEPTH = 100;
+const int h = 256, w = 256;
+const int MAX_DEPTH = 10;
 const int SCENE_ID = 4;
 
 #endif

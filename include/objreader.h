@@ -26,7 +26,7 @@ public:
 
     }
 
-    TriangleMesh *process(Material *material);
+    TriangleMesh *process(Material *material, const Vector &resize, const Vector &delta);
 
 protected:
     std::string _filename;

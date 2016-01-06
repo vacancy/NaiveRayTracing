@@ -17,27 +17,23 @@
 
 namespace rt {
 
-enum REFLECT_T {
-    REFL_DIFF,
-    REFL_SPEC,
-    REFL_REFR
-};
-
 class Material {
 
 };
 
 class Phong : public Material {
 public:
-    REFLECT_T reflect_type;
     Vector emission, color, c_color;
     double color_max;
-    double shininess, reflectiveness;
+    double k_diff, k_spec;
+    double beta = 1.5;
+    int  n_spec;
+    bool have_refr;
 
     Phong(void) { }
 
-    Phong(REFLECT_T refl_type, const Vector &c, const Vector &e)
-            : reflect_type(refl_type), color(c), emission(e) {
+    Phong(const Vector &c, const Vector &e, double k_diff, double k_spec=0, int n_spec=1, bool have_refr=false)
+            : k_diff(k_diff), k_spec(k_spec), n_spec(n_spec), color(c), emission(e), have_refr(have_refr) {
 
         color_max = std::max(color.x, std::max(color.y, color.z));
         c_color = color / color_max;

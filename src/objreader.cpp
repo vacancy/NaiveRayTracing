@@ -8,14 +8,17 @@
  **/
 
 #include "../include/objreader.h"
+#include <iostream>
 #include <fstream>
 
+using std::cout;
+using std::endl;
 using std::ifstream;
 using std::ios;
 
 namespace rt {
 
-TriangleMesh *ObjReader::process(Material *material) {
+TriangleMesh *ObjReader::process(Material *material, const Vector &resize, const Vector &delta) {
     ifstream f;
     f.open(_filename.c_str(), ios::in);
 
@@ -31,8 +34,8 @@ TriangleMesh *ObjReader::process(Material *material) {
             char op;
             double x, y, z;
             sscanf(buffer, "%c %lf %lf %lf", &op, &x, &y, &z);
-            x *= 1.4;
-            vertexes.push_back(Vector(x, y, z));
+            Vector vertex = (Vector(x, y, z) * resize) + delta;
+            vertexes.push_back(vertex);
         } else if (buffer[0] == 'f') {
             char op;
             int x, y, z;

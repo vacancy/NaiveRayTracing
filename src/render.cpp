@@ -9,6 +9,7 @@
 
 #include "../include/config.h"
 #include "../include/render.h"
+#include <cmath>
 #include <iostream>
 
 using std::cout;
@@ -18,6 +19,31 @@ using std::endl;
 extern bool DEBUG;
 
 namespace rt {
+
+template <int times>
+static inline double expand_pow(double base) {
+    double res = base;
+#pragma unroll
+    for (int i = 1; i < times; ++i)
+        res = res * base;
+    return res;
+}
+
+static inline double int_pow(double base1, int times) {
+    if (times == 1)  return base1;
+    if (times == 2)  return base1 * base1;
+    if (times == 3)  return base1 * base1 * base1;
+    double base2 = base1 * base1;
+    if (times == 4)  return base2 * base2;
+    if (times == 5)  return base2 * base2 * base1;
+    if (times == 6)  return base2 * base2 * base2;
+    double base4 = base2 * base2;
+    if (times == 7)  return base4 * base2 * base1;
+    if (times == 8)  return base4 * base4;
+    if (times == 9)  return base4 * base4 * base1;
+    if (times == 10) return base4 * base4 * base2;
+}
+
 
 Vector PathTraceRender::trace(const Ray &ray, int depth, LCGStream *rng) {
     Intersection inter = _scene->intersect(ray);
@@ -30,61 +56,60 @@ Vector PathTraceRender::trace(const Ray &ray, int depth, LCGStream *rng) {
 
     if (!inter.object) {
         return Vector::Zero;
-    } else {
-        int new_depth = depth + 1;
-        bool is_max_depth = new_depth >= _max_depth;
-        Object *object = inter.object;
-        Phong *material = static_cast<Phong *>(object->material);
+    }
 
-        bool use_rr = new_depth > 5;
-        bool roulette = use_rr && rng->get() < material->color_max;
+    int new_depth = depth + 1;
+    bool is_max_depth = new_depth >= _max_depth;
+    Object *object = inter.object;
+    Phong *material = static_cast<Phong *>(object->material);
 
-        if (is_max_depth || (use_rr && !roulette)) {
-            return material->emission;
-        }
-        Vector f = (use_rr && roulette) ? material->c_color : material->color;
+    bool use_rr = new_depth > 5;
+    bool roulette = use_rr && rng->get() < material->color_max;
 
-        Vector norm = inter.norm;
-        Vector pos = inter.position;
-        Vector abs_norm = (dot(norm, ray.direct) < 0) ? norm : norm * -1;
+    if (is_max_depth || (use_rr && !roulette)) {
+        return material->emission;
+    }
+    Vector f = (use_rr && roulette) ? material->c_color : material->color;
 
-        if (material->reflect_type == REFL_DIFF) {
-            double r1 = 2 * PI * rng->get();
-            double r2 = rng->get();
-            double r2s = sqrt(r2);
+    Vector norm = inter.norm;
+    Vector pos = inter.position;
+    Vector abs_norm = (dot(norm, ray.direct) < 0) ? norm : norm * -1;
 
-            Vector w = abs_norm;
-            Vector wo = w.x < -0.1 || w.x > 0.1 ? Vector::YAxis : Vector::XAxis;
-            Vector u = cross(wo, w).norm();
-            Vector v = cross(w, u);
-            Vector d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).norm();
-            return material->emission + f * trace(Ray(pos, d), new_depth, rng);
-        } else if (material->reflect_type == REFL_SPEC) {
-            Vector d = ray.direct - norm * 2 * dot(norm, ray.direct);
-            return material->emission + f * trace(Ray(pos, d), new_depth, rng);
-        } else { // if (material->reflect_type == REFL_REFR) {
-            Vector ans2;
+    Vector trace_res = Vector::Zero;
 
+    double rr = rng->get() * (material->k_diff + material->k_spec);
+    if (use_rr && rr < material->k_diff+eps || !use_rr && material->k_diff > eps) {
+        double r1 = 2 * PI * rng->get();
+        double r2 = rng->get();
+        double r2s = sqrt(r2);
+
+        Vector w = abs_norm;
+        Vector wo = w.x < -0.1 || w.x > 0.1 ? Vector::YAxis : Vector::XAxis;
+        Vector u = cross(wo, w).norm();
+        Vector v = cross(w, u);
+        Vector d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).norm();
+        trace_res = trace_res + material->k_diff * trace(Ray(pos, d), new_depth, rng);
+    }
+    if (use_rr && rr > material->k_diff-eps || !use_rr && material->k_spec > eps) {
+        if (material->have_refr) {
             Vector d_refl = ray.direct - norm * 2 * dot(norm, ray.direct);
-            // cout << "refl = " << d_refl << endl;
 
             bool into = dot(norm, abs_norm) > 0;
-            double alpha = 1, beta = 1.5;
+            double alpha = 1, beta = material->beta;
             double nnt = into ? alpha / beta : beta / alpha;
             double ddn = dot(ray.direct, abs_norm);
             double cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
 
             if (cos2t < 0) {
                 Vector res1 = trace(Ray(pos, d_refl), new_depth, rng);
-                return material->emission + f * res1;
+                trace_res = trace_res + material->k_spec * res1;
             } else {
                 Vector d_refr = (ray.direct * nnt - norm * ((into ? 1 : -1) * (ddn * nnt + sqrt(cos2t)))).norm();
-                // cout << "refl = " << d_refr << endl;
 
                 double a = beta - alpha, b = beta + alpha;
                 double R0 = sqr(a) / sqr(b);
                 double c = 1 - (into ? -ddn : dot(norm, d_refr));
-                double Re = R0 + (1 - R0) * c * c * c * c * c;
+                double Re = R0 + (1 - R0) * int_pow(c, material->n_spec);
                 double Tr = 1 - Re;
                 double P = 0.25 + 0.5 * Re;
 
@@ -97,15 +122,16 @@ Vector PathTraceRender::trace(const Ray &ray, int depth, LCGStream *rng) {
                     Vector res2 = trace(Ray(pos, d_refr), new_depth, rng) * Tr;
                     result = res1 + res2;
                 }
-
-                Vector ans = (material->emission + f * result);
-                // if (new_depth == 1)
-                // 	printf("result = %f %f %f\n", ans.x, ans.y, ans.z);
-
-                return ans;
+                trace_res = trace_res + material->k_spec * result;
             }
+
+        } else {
+            Vector d = ray.direct - norm * 2 * dot(norm, ray.direct);
+            trace_res = trace_res + material->k_spec * trace(Ray(pos, d), new_depth, rng);
         }
     }
+
+    return material->emission + f * trace_res;
 }
 
 void PathTraceRender::render(Camera *camera, Canvas *canvas) {
@@ -113,7 +139,7 @@ void PathTraceRender::render(Camera *camera, Canvas *canvas) {
 
 #pragma omp parallel for schedule(dynamic, 1)
     for (int y = 0; y < h; ++y) {
-        LCGStream *rng = new LCGStream(666666 + y);
+        LCGStream *rng = new LCGStream(19961018 + y);
         fprintf(stderr, "\rRendering (%d spp) %5.2f%%", SAMPLE_ALL, 100. * y / (h - 1));
         for (int x = 0; x < w; ++x) {
             Vector color = Vector::Zero;
