@@ -1,21 +1,19 @@
 /**
- * File   : material.h
+ * File   : mtlbase
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-11-16 10:44:30
+ * Date   : $YEAR-$MONTH-07 12:44
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_MATERIAL_H_
-#define _INCLUDE_MATERIAL_H_
+#ifndef RAYTRACE_MTLBASE_H
+#define RAYTRACE_MTLBASE_H
 
-#include "base.h"
-#include <cmath>
-#include <vector>
-#include <algorithm>
+#include "../core/common.h"
+#include "../core/vector3.h"
 
-namespace rt {
+namespace diorama {
 
 class Material {
 
@@ -40,6 +38,6 @@ public:
     }
 };
 
-} // end namespace rt
+} // End namespace diorama
 
-#endif
+#endif //RAYTRACE_MTLBASE_H

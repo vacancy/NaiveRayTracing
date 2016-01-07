@@ -1,20 +1,18 @@
 /**
- * File   : vector.h
+ * File   : veckd
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2016-01-04 10:34:59
+ * Date   : $YEAR-$MONTH-07 12:41
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_VECTOR_KD_H_
-#define _INCLUDE_VECTOR_KD_H_
+#ifndef RAYTRACE_VECKD_H
+#define RAYTRACE_VECKD_H
 
-#include "base.h"
 #include "kdbase.h"
-#include <vector>
 
-namespace rt {
+namespace diorama {
 
 template <typename T>
 class VecKDTree {
@@ -112,7 +110,6 @@ private:
     int _max_leaf_size = 30;
 };
 
-} // end namespace rt
+} // End namespace diorama
 
-
-#endif
+#endif //RAYTRACE_VECKD_H

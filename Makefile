@@ -8,10 +8,10 @@
 
 SRC_DIR = src
 INC_DIR = include
-OBJ_DIR = obj
-BIN_DIR = bin
-LIB_DIR = lib
-TARGET = ray_trace
+OBJ_DIR = build/obj
+BIN_DIR = build/bin
+LIB_DIR = build/lib
+TARGET = diorama
 
 CXX = $(ENVIRONMENT_OPTIONS) g++
 #CXX = clang++

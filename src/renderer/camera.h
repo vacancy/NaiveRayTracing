@@ -1,18 +1,21 @@
 /**
- * File   : camera.h
+ * File   : camera
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-11-16 12:04:19
+ * Date   : $YEAR-$MONTH-07 12:46
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_CAMERA_H_
-#define _INCLUDE_CAMERA_H_
+#ifndef RAYTRACE_CAMERA_H
+#define RAYTRACE_CAMERA_H
 
-#include "object.h"
+#include "../core/common.h"
+#include "../core/vector3.h"
+#include "../core/ray.h"
+#include "../object/objbase.h"
 
-namespace rt {
+namespace diorama {
 
 class Camera {
 public:
@@ -36,7 +39,7 @@ public:
         up = u;
         right = cross(f, u);
         fov = fov_;
-        fov_scale = tan(fov_ * 0.5 * PI / 180) * 2;
+        fov_scale = tan(fov_ * 0.5 * pi / 180) * 2;
     }
 
     inline virtual Ray generate(double x, double y) {
@@ -46,6 +49,6 @@ public:
     }
 };
 
-} // end namespace rt
+} // End namespace diorama
 
-#endif
+#endif //RAYTRACE_CAMERA_H

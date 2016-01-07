@@ -1,22 +1,19 @@
 /**
- * File   : canvas.h
+ * File   : canvas
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-11-16 10:44:30
+ * Date   : $YEAR-$MONTH-07 12:36
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_CANVAS_H_
-#define _INCLUDE_CANVAS_H_
+#ifndef RAYTRACE_CANVAS_H
+#define RAYTRACE_CANVAS_H
 
-#include <cstring>
-#include <string>
+#include "common.h"
 #include <opencv2/core/core.hpp>
 
-namespace rt {
-
-typedef unsigned char uint8;
+namespace diorama {
 
 class Canvas {
 public:
@@ -40,7 +37,7 @@ public:
         mat[x * st0 + y * st1 + c] = v;
     }
 
-    void show(void);
+    void show(const std::string &);
 
     void write(const std::string &);
 
@@ -48,6 +45,6 @@ protected:
     cv::Mat _to_mat(void);
 };
 
-} // end namespace rt
+} // End namespace diorama
 
-#endif
+#endif //RAYTRACE_CANVAS_H_H

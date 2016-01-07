@@ -1,22 +1,15 @@
 /**
- * File   : object.h
+ * File   : objdetail
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-11-16 10:44:30
+ * Date   : $YEAR-$MONTH-07 12:46
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#include "../include/object.h"
-#include <iostream>
+#include "objdetail.h"
 
-using std::vector;
-using std::swap;
-using std::cout;
-using std::cerr;
-using std::endl;
-
-namespace rt {
+namespace diorama {
 
 const Intersection Intersection::null = Intersection();
 
@@ -34,6 +27,7 @@ Intersection Scene::intersect(const Ray &ray) {
 }
 
 // {{{ Begin triangle intersection
+
 inline static bool _sameside(const Vector &a, const Vector &b, const Vector &c, const Vector &p) {
     Vector ab = b - a, ac = c - a, ap = p - a;
     Vector v1 = cross(ab, ac);
@@ -64,21 +58,13 @@ Intersection Triangle::intersect(const Ray &ray) {
     return Intersection::null;
 }
 
-Intersection TriangleMesh::intersect(const Ray &ray) {
-    if (!_bbox.intersect(ray)) {
-        return Intersection::null;
-    }
-
-    Intersection res = Intersection::null;
-    for (Triangle *triangle : _triangles) {
-        Intersection tmp = triangle->intersect(ray);
-        if (tmp.object != NULL) {
-            if (res.object == NULL || res.distance > tmp.distance)
-                res = tmp;
-        }
-    }
-
-    return res;
+std::ostream &operator<<(std::ostream &os, const Triangle &tri) {
+    os << "Triangle("
+    << "(" << tri.a.x << " " << tri.a.y << " " << tri.a.z << ")" << ", "
+    << "(" << tri.b.x << " " << tri.b.y << " " << tri.b.z << ")" << ", "
+    << "(" << tri.c.x << " " << tri.c.y << " " << tri.c.z << ")"
+    << ")";
+    return os;
 }
 
 // }}} End triangle intersection
@@ -121,15 +107,4 @@ Intersection Plane::intersect(const Ray &ray) {
     return res;
 }
 
-// {{{ Begin output operations
-std::ostream &operator<<(std::ostream &os, const Triangle &tri) {
-    os << "Triangle("
-    << "(" << tri.a.x << " " << tri.a.y << " " << tri.a.z << ")" << ", "
-    << "(" << tri.b.x << " " << tri.b.y << " " << tri.b.z << ")" << ", "
-    << "(" << tri.c.x << " " << tri.c.y << " " << tri.c.z << ")"
-    << ")";
-    return os;
-}
-// }}} End output operations
-
-} // end namespace rt
+} // End namespace diorama

@@ -1,22 +1,21 @@
 /**
- * File   : canvas.cpp
+ * File   : canvas
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-11-18 23:38:23
+ * Date   : $YEAR-$MONTH-07 12:37
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#include "../include/canvas.h"
-
-#include <cassert>
+#include "canvas.h"
 #include <opencv2/highgui/highgui.hpp>
 
-namespace rt {
 
-void Canvas::show(void) {
+namespace diorama {
+
+void Canvas::show(const std::string &windowname) {
     cv::Mat res = _to_mat();
-    cv::imshow("Canvas", res);
+    cv::imshow(windowname, res);
     cv::waitKey(0);
 }
 
@@ -38,4 +37,4 @@ cv::Mat Canvas::_to_mat(void) {
     return res;
 }
 
-} // end namespace rt
+} // End namespace diorama

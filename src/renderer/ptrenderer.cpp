@@ -1,24 +1,19 @@
 /**
- * File   : render.cpp
+ * File   : ptrenderer
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-11-16 11:50:46
+ * Date   : $YEAR-$MONTH-07 13:32
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#include "../include/config.h"
-#include "../include/render.h"
-#include <cmath>
-#include <iostream>
+#include "ptrenderer.h"
+#include "../config.h"
 
 using std::cout;
-using std::cerr;
 using std::endl;
 
-extern bool DEBUG;
-
-namespace rt {
+namespace diorama {
 
 template <int times>
 static inline double expand_pow(double base) {
@@ -42,10 +37,15 @@ static inline double int_pow(double base1, int times) {
     if (times == 8)  return base4 * base4;
     if (times == 9)  return base4 * base4 * base1;
     if (times == 10) return base4 * base4 * base2;
+
+    for (int i = 4; i < times; ++i) {
+        base4 *= base1;
+    }
+    return base4;
 }
 
 
-Vector PathTraceRender::trace(const Ray &ray, int depth, LCGStream *rng) {
+Vector PTRenderer::trace(const Ray &ray, int depth, LCGStream *rng) {
     Intersection inter = _scene->intersect(ray);
     if (DEBUG) {
         cout << "current depth " << depth << endl;
@@ -79,7 +79,7 @@ Vector PathTraceRender::trace(const Ray &ray, int depth, LCGStream *rng) {
 
     double rr = rng->get() * (material->k_diff + material->k_spec);
     if (use_rr && rr < material->k_diff+eps || !use_rr && material->k_diff > eps) {
-        double r1 = 2 * PI * rng->get();
+        double r1 = 2 * pi * rng->get();
         double r2 = rng->get();
         double r2s = sqrt(r2);
 
@@ -134,7 +134,7 @@ Vector PathTraceRender::trace(const Ray &ray, int depth, LCGStream *rng) {
     return material->emission + f * trace_res;
 }
 
-void PathTraceRender::render(Camera *camera, Canvas *canvas) {
+void PTRenderer::render(Camera *camera, Canvas *canvas) {
     int h = canvas->h, w = canvas->w;
 
 #pragma omp parallel for schedule(dynamic, 1)
@@ -168,38 +168,4 @@ void PathTraceRender::render(Camera *camera, Canvas *canvas) {
     }
 }
 
-Vector DepthRender::trace(const Ray &ray) {
-    Intersection inter = _scene->intersect(ray);
-    if (DEBUG) {
-        cout << "current ray.x " << ray.origin << endl;
-        cout << "current ray.d " << ray.direct << endl;
-        cout << "intersection distance = " << inter.distance << endl;
-    }
-
-    if (!inter.object) {
-        return Vector::Zero;
-    }
-    Object *object = inter.object;
-    Phong *material = static_cast<Phong *>(object->material);
-    return material->color / inter.distance;
-}
-
-void DepthRender::render(Camera *camera, Canvas *canvas) {
-    int h = canvas->h, w = canvas->w;
-
-    for (int y = 0; y < h; ++y) {
-        fprintf(stderr, "\rRendering %5.2f%%", 100. * y / (h - 1));
-        for (int x = 0; x < w; ++x) {
-            double sy = 1.0 - (double(y) / h);
-            double sx = double(x) / w;
-            Ray ray = camera->generate(sx, sy);
-            Vector color = trace(ray);
-            color = color * _norm;
-            canvas->set(y, x, 0, clamp_int(color.x));
-            canvas->set(y, x, 1, clamp_int(color.y));
-            canvas->set(y, x, 2, clamp_int(color.z));
-        }
-    }
-}
-
-} // end namespace rt
+} // End namespace diorama

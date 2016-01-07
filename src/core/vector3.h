@@ -1,34 +1,23 @@
 /**
- * File   : base.h
+ * File   : vector3
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-11-15 15:51:20
+ * Date   : $YEAR-$MONTH-07 12:33
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_BASE_H_
-#define _INCLUDE_BASE_H_
+#ifndef RAYTRACE_VECTOR3_H
+#define RAYTRACE_VECTOR3_H
 
-#include <cmath>
-#include <iostream>
-#include <utility>
+#include "common.h"
 
-namespace rt {
-
-const double PI = 3.14159265358979323;
-const double eps = 1e-6;
-const double bigeps = 1e-4;
-const double inf = 1e20;
-
-inline double sqr(const double x) {
-    return x * x;
-}
-
-typedef std::pair<double, double> Pair;
+namespace diorama {
 
 class Vector {
 public:
+    typedef double value_t;
+
     union {
         struct {
             double x, y, z;
@@ -41,7 +30,6 @@ public:
     Vector(void) { }
 
     Vector(double x_, double y_, double z_) : x(x_), y(y_), z(z_) { }
-    //Vector(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
 
     inline double &operator[](int index) {
         return _values[index];
@@ -78,7 +66,6 @@ public:
     static const Vector ZAxis;
 };
 
-// {{{ Begin vector operations
 inline double dot(const Vector &op0, const Vector &op1) {
     return op0.x * op1.x + op0.y * op1.y + op0.z * op1.z;
 }
@@ -130,21 +117,12 @@ inline Vector operator/(const Vector &op0, const double &op1) {
 inline Vector operator/(const Vector &op0, const Vector &op1) {
     return Vector(op0.x / op1.x, op0.y / op1.y, op0.z / op1.z);
 }
-// }}} End vector operations
 
-inline double clamp(double x) {
-    if (x < 0) return 0;
-    else if (x > 1) return 1;
-    else return x;
+inline std::ostream &operator<<(std::ostream &os, const Vector &vec) {
+    os << "Vector(" << vec.x << " " << vec.y << " " << vec.z << ")";
+    return os;
 }
 
-inline double clamp_int(double x) {
-    //return int(clamp(x) * 255. + 0.5);
-    return int(pow(clamp(x), 1 / 2.2) * 255 + .5);
-}
+} // End namespace diorama
 
-std::ostream &operator<<(std::ostream &os, const Vector &vec);
-
-} // end namespace rt
-
-#endif
+#endif //RAYTRACE_VECTOR3_H

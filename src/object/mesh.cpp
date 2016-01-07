@@ -1,30 +1,38 @@
 /**
- * File   : objreader.cpp
+ * File   : mesh
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-12-23 23:48:46
+ * Date   : $YEAR-$MONTH-07 13:17
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#include "../include/objreader.h"
-#include <iostream>
-#include <fstream>
+#include "mesh.h"
 
-using std::cout;
-using std::endl;
-using std::ifstream;
-using std::ios;
+namespace diorama {
 
-namespace rt {
+Intersection TriangleMesh::intersect(const Ray &ray) {
+    if (!_bbox.intersect(ray)) {
+        return Intersection::null;
+    }
 
-TriangleMesh *ObjReader::process(Material *material, const Vector &resize, const Vector &delta) {
-    ifstream f;
-    f.open(_filename.c_str(), ios::in);
+    Intersection res = Intersection::null;
+    for (Triangle *triangle : _triangles) {
+        Intersection tmp = triangle->intersect(ray);
+        if (tmp.object != NULL) {
+            if (res.object == NULL || res.distance > tmp.distance)
+                res = tmp;
+        }
+    }
 
+    return res;
+}
+
+TriangleMesh* TriangleMesh::from_stream(std::istream &f, Material *material, const Vector &resize,
+                                               const Vector &delta) {
     TriangleMesh *mesh = new TriangleMesh();
-    TriangleMesh::TriangleVector &triangels = mesh->_triangles;
-    TriangleMesh::VertexVector vertexes;
+    TriangleMesh::triangle_vec_t &triangels = mesh->_triangles;
+    TriangleMesh::vertex_vec_t vertexes;
 
     char buffer[128];
     while (f.getline(buffer, 128)) {
@@ -47,9 +55,7 @@ TriangleMesh *ObjReader::process(Material *material, const Vector &resize, const
     }
 
     mesh->initialize(vertexes);
-    f.close();
-
     return mesh;
 }
 
-} // end namespace rt
+} // End namespace diorama

@@ -1,20 +1,18 @@
 /**
- * File   : kdbase.h
+ * File   : kdbase
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2016-01-04 10:25:32
+ * Date   : $YEAR-$MONTH-07 12:41
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_KDBASE_H_
-#define _INCLUDE_KDBASE_H_
+#ifndef RAYTRACE_KDBASE_H
+#define RAYTRACE_KDBASE_H
 
-#include "base.h"
-#include "objreader.h"
-#include <vector>
+#include "../core/common.h"
 
-namespace rt {
+namespace diorama {
 
 /**
  * Using CRTP mode to inherit.
@@ -39,6 +37,6 @@ struct KDCompareBase {
     virtual bool operator ()(const ptr_t &lhs, const ptr_t &rhs) const = 0;
 };
 
-} // end namespace rt
+} // End namespace diorama
 
-#endif
+#endif //RAYTRACE_KDBASE_H

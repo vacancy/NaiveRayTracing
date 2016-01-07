@@ -6,4 +6,5 @@
 bin/
 obj/
 test/
+src.bak/
 .idea/

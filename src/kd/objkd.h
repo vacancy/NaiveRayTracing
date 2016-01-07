@@ -1,20 +1,19 @@
 /**
- * File   : objkd.h
+ * File   : objkd
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2015-12-31 16:59:47
+ * Date   : $YEAR-$MONTH-07 12:41
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#ifndef _INCLUDE_OBJECT_KD_H_
-#define _INCLUDE_OBJECT_KD_H_
+#ifndef RAYTRACE_OBJKD_H
+#define RAYTRACE_OBJKD_H
 
-#include "base.h"
 #include "kdbase.h"
-#include <vector>
+#include "../object/mesh.h"
 
-namespace rt {
+namespace diorama {
 
 class ObjKDTree : public Object {
 public:
@@ -47,7 +46,6 @@ private:
     int _max_leaf_size = 30;
 };
 
-} // end namespace rt
+} // End namespace diorama
 
-
-#endif
+#endif //RAYTRACE_OBJKD_H

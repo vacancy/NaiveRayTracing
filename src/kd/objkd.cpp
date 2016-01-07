@@ -1,19 +1,15 @@
 /**
- * File   : objkd.cpp
+ * File   : objkd
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : 2016-01-01 11:49:07
+ * Date   : $YEAR-$MONTH-07 12:42
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
 
-#include "../include/objkd.h"
-#include <algorithm>
+#include "objkd.h"
 
-using std::vector;
-using std::swap;
-
-namespace rt {
+namespace diorama {
 
 inline static int get_triangle_side(const Triangle *triangle, int axis, double split) {
     int cnt[2] = {0, 0};
@@ -28,7 +24,7 @@ inline static int get_triangle_side(const Triangle *triangle, int axis, double s
     return 0;
 }
 
-void ObjKDTree::_build(ObjKDNode *&root, const vector<Triangle *> &a, BoundingBox bbox, int current) {
+void ObjKDTree::_build(ObjKDNode *&root, const std::vector<Triangle *> &a, BoundingBox bbox, int current) {
     if (a.empty()) {
         return;
     }
@@ -43,7 +39,7 @@ void ObjKDTree::_build(ObjKDNode *&root, const vector<Triangle *> &a, BoundingBo
         root->axis = current;
         root->split = (bbox.vmax[current] + bbox.vmin[current]) / 2;
 
-        vector<Triangle *> la, ra;
+        std::vector<Triangle *> la, ra;
         for (Triangle *triangle : a) {
             int res = get_triangle_side(triangle, root->axis, root->split);
             if (res <= 0) la.push_back(triangle);
@@ -83,7 +79,7 @@ Intersection ObjKDTree::_traverse(ObjKDNode *root, const Ray &ray) {
         bool ignored = false, swaped = false;
 
         if (near_x > split) {
-            swap(lson, rson), swaped = true;
+            std::swap(lson, rson), swaped = true;
             if (far_x > split) ignored = true;
         } else if (far_x < split) {
             ignored = true;
@@ -118,4 +114,4 @@ Intersection ObjKDTree::intersect(const Ray &ray) {
     return res;
 }
 
-} // End namespace rt
+} // End namespace diorama
