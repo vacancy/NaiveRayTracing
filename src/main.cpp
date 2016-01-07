@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
         Object *back = new Plane(Vector(0, 0, 1.2), Vector(0, 0, -1));
         Object *bottom = new Plane(Vector(0, -1, 0), Vector(0, 1, 0));
         Object *top = new Plane(Vector(0, 2.5, 0), Vector(0, -1, 0));
-        Object *light = new Sphere(Vector(0, 50 + 2.5 - 0.01, 0), 50);
+        Object *light = new Sphere(Vector(0, 50 + 2.5 - 0.01, -1), 50);
         right->set_material(new Phong(Vector(.25, .25, .75), Vector::Zero, 1))->add_to_scene(scene4);
         left->set_material(new Phong(Vector(.75, .25, .25), Vector::Zero, 1))->add_to_scene(scene4);
         back->set_material(new Phong(Vector(.25, .65, .25), Vector::Zero, 1))->add_to_scene(scene4);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
         ObjReader *reader = new ObjReader("fixed.perfect.dragon.02K.0.07.obj");
         TriangleMesh *dragon = reader->process(
                 new Phong(Vector(0.999, 0.999, 0.999), Vector::Zero, 0.3, 0.7, 5, true),
-                Vector(1.5, 1, 1), Vector(0, 0, -2.5)
+                Vector(1.5, 1, 1), Vector(0, 0, -2)
         );
         ObjKDTree *dragon_kd = new ObjKDTree(dragon);
         dragon_kd->add_to_scene(scene4);
