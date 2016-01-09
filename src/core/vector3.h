@@ -43,13 +43,17 @@ public:
         return sqrt(x * x + y * y + z * z);
     }
 
-    inline double len2(void) {
+    inline double l2(void) {
         return (x * x + y * y + z * z);
     }
 
     inline Vector norm(void) const {
         double len_inv = 1.0 / sqrt(x * x + y * y + z * z);
         return Vector(x * len_inv, y * len_inv, z * len_inv);
+    }
+
+    inline double mean(void) const {
+        return (x + y + z) / 3;
     }
 
     inline double min(void) const {
@@ -66,24 +70,22 @@ public:
     static const Vector ZAxis;
 };
 
-inline double dot(const Vector &op0, const Vector &op1) {
-    return op0.x * op1.x + op0.y * op1.y + op0.z * op1.z;
-}
-
-inline Vector cross(const Vector &op0, const Vector &op1) {
-    return Vector(
-            op0.y * op1.z - op0.z * op1.y,
-            op0.z * op1.x - op0.x * op1.z,
-            op0.x * op1.y - op0.y * op1.x
-    );
-}
-
 inline Vector operator+(const Vector &op0, const Vector &op1) {
     return Vector(op0.x + op1.x, op0.y + op1.y, op0.z + op1.z);
 }
 
 inline Vector operator-(const Vector &op0, const Vector &op1) {
     return Vector(op0.x - op1.x, op0.y - op1.y, op0.z - op1.z);
+}
+
+inline Vector &operator+=(Vector &op0, const Vector &op1) {
+    op0.x += op1.x, op0.y += op1.y, op0.z += op1.z;
+    return op0;
+}
+
+inline Vector &operator-=(Vector &op0, const Vector &op1) {
+    op0.x -= op1.x, op0.y -= op1.y, op0.z -= op1.z;
+    return op0;
 }
 
 inline Vector operator+(const Vector &op0, const double &op1) {
@@ -116,6 +118,22 @@ inline Vector operator/(const Vector &op0, const double &op1) {
 
 inline Vector operator/(const Vector &op0, const Vector &op1) {
     return Vector(op0.x / op1.x, op0.y / op1.y, op0.z / op1.z);
+}
+
+inline double dot(const Vector &op0, const Vector &op1) {
+    return op0.x * op1.x + op0.y * op1.y + op0.z * op1.z;
+}
+
+inline Vector cross(const Vector &op0, const Vector &op1) {
+    return Vector(
+        op0.y * op1.z - op0.z * op1.y,
+        op0.z * op1.x - op0.x * op1.z,
+        op0.x * op1.y - op0.y * op1.x
+    );
+}
+
+inline Vector reflect(const Vector &in, const Vector &norm) {
+    return in - norm * 2 * dot(norm, in);
 }
 
 inline std::ostream &operator<<(std::ostream &os, const Vector &vec) {

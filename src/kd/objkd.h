@@ -33,6 +33,9 @@ public:
     void initialize();
 
     virtual Intersection intersect(const Ray &ray);
+    virtual void sample(RandomStream *rng, Ray &ray, double &pdf) {
+
+    }
 
     TriangleMesh *wrapper;
     ObjKDNode *root;

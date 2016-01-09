@@ -37,7 +37,7 @@ public:
         mat[x * st0 + y * st1 + c] = v;
     }
 
-    void show(const std::string &);
+    void show(const std::string &, bool wait = true);
 
     void write(const std::string &);
 

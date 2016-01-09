@@ -58,6 +58,11 @@ Intersection Triangle::intersect(const Ray &ray) {
     return Intersection::null;
 }
 
+void Triangle::sample(RandomStream *rng, Ray &ray, double &pdf) {
+    ray = rng->sample_triangle(a, b, c, norm);
+    pdf = 1;
+}
+
 std::ostream &operator<<(std::ostream &os, const Triangle &tri) {
     os << "Triangle("
     << "(" << tri.a.x << " " << tri.a.y << " " << tri.a.z << ")" << ", "
@@ -72,7 +77,7 @@ std::ostream &operator<<(std::ostream &os, const Triangle &tri) {
 Intersection Sphere::intersect(const Ray &ray) {
     Vector v = center - ray.origin;
     double b = dot(v, ray.direct);
-    double det = b * b - v.len2() + sqrrad;
+    double det = b * b - v.l2() + sqrrad;
     if (det > 0) {
         double sdet = sqrt(det);
         double distance = 0;
@@ -91,6 +96,11 @@ Intersection Sphere::intersect(const Ray &ray) {
     }
 
     return Intersection::null;
+}
+
+void Sphere::sample(RandomStream *rng, Ray &ray, double &pdf) {
+    ray = rng->sample_sphere(center, radius);
+    pdf = 1;
 }
 
 Intersection Plane::intersect(const Ray &ray) {

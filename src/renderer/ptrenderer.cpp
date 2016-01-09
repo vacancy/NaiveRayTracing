@@ -15,36 +15,6 @@ using std::endl;
 
 namespace diorama {
 
-template <int times>
-static inline double expand_pow(double base) {
-    double res = base;
-#pragma unroll
-    for (int i = 1; i < times; ++i)
-        res = res * base;
-    return res;
-}
-
-static inline double int_pow(double base1, int times) {
-    if (times == 1)  return base1;
-    if (times == 2)  return base1 * base1;
-    if (times == 3)  return base1 * base1 * base1;
-    double base2 = base1 * base1;
-    if (times == 4)  return base2 * base2;
-    if (times == 5)  return base2 * base2 * base1;
-    if (times == 6)  return base2 * base2 * base2;
-    double base4 = base2 * base2;
-    if (times == 7)  return base4 * base2 * base1;
-    if (times == 8)  return base4 * base4;
-    if (times == 9)  return base4 * base4 * base1;
-    if (times == 10) return base4 * base4 * base2;
-
-    for (int i = 4; i < times; ++i) {
-        base4 *= base1;
-    }
-    return base4;
-}
-
-
 Vector PTRenderer::trace(const Ray &ray, int depth, LCGStream *rng) {
     Intersection inter = _scene->intersect(ray);
     if (DEBUG) {
@@ -61,77 +31,23 @@ Vector PTRenderer::trace(const Ray &ray, int depth, LCGStream *rng) {
     int new_depth = depth + 1;
     bool is_max_depth = new_depth >= _max_depth;
     Object *object = inter.object;
-    Phong *material = static_cast<Phong *>(object->material);
+    Material *material = object->material;
 
     bool use_rr = new_depth > 5;
-    bool roulette = use_rr && rng->get() < material->color_max;
+    bool roulette = use_rr && rng->get() < material->max_color;
 
     if (is_max_depth || (use_rr && !roulette)) {
         return material->emission;
     }
-    Vector f = (use_rr && roulette) ? material->c_color : material->color;
-
+    Vector flux = (use_rr && roulette) ? material->normed_color : material->color;
     Vector norm = inter.norm;
     Vector pos = inter.position;
-    Vector abs_norm = (dot(norm, ray.direct) < 0) ? norm : norm * -1;
 
-    Vector trace_res = Vector::Zero;
+    Ray new_ray;
+    double pdf;
+    material->sample(ray, pos, norm, rng, new_ray, pdf);
 
-    double rr = rng->get() * (material->k_diff + material->k_spec);
-    if (use_rr && rr < material->k_diff+eps || !use_rr && material->k_diff > eps) {
-        double r1 = 2 * pi * rng->get();
-        double r2 = rng->get();
-        double r2s = sqrt(r2);
-
-        Vector w = abs_norm;
-        Vector wo = w.x < -0.1 || w.x > 0.1 ? Vector::YAxis : Vector::XAxis;
-        Vector u = cross(wo, w).norm();
-        Vector v = cross(w, u);
-        Vector d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).norm();
-        trace_res = trace_res + material->k_diff * trace(Ray(pos, d), new_depth, rng);
-    }
-    if (use_rr && rr > material->k_diff-eps || !use_rr && material->k_spec > eps) {
-        if (material->have_refr) {
-            Vector d_refl = ray.direct - norm * 2 * dot(norm, ray.direct);
-
-            bool into = dot(norm, abs_norm) > 0;
-            double alpha = 1, beta = material->beta;
-            double nnt = into ? alpha / beta : beta / alpha;
-            double ddn = dot(ray.direct, abs_norm);
-            double cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
-
-            if (cos2t < 0) {
-                Vector res1 = trace(Ray(pos, d_refl), new_depth, rng);
-                trace_res = trace_res + material->k_spec * res1;
-            } else {
-                Vector d_refr = (ray.direct * nnt - norm * ((into ? 1 : -1) * (ddn * nnt + sqrt(cos2t)))).norm();
-
-                double a = beta - alpha, b = beta + alpha;
-                double R0 = sqr(a) / sqr(b);
-                double c = 1 - (into ? -ddn : dot(norm, d_refr));
-                double Re = R0 + (1 - R0) * int_pow(c, material->n_spec);
-                double Tr = 1 - Re;
-                double P = 0.25 + 0.5 * Re;
-
-                Vector result;
-                if (new_depth > 2) {
-                    if (rng->get() < P) result = trace(Ray(pos, d_refl), new_depth, rng) * Re / P;
-                    else result = trace(Ray(pos, d_refr), new_depth, rng) * Tr / (1 - P);
-                } else {
-                    Vector res1 = trace(Ray(pos, d_refl), new_depth, rng) * Re;
-                    Vector res2 = trace(Ray(pos, d_refr), new_depth, rng) * Tr;
-                    result = res1 + res2;
-                }
-                trace_res = trace_res + material->k_spec * result;
-            }
-
-        } else {
-            Vector d = ray.direct - norm * 2 * dot(norm, ray.direct);
-            trace_res = trace_res + material->k_spec * trace(Ray(pos, d), new_depth, rng);
-        }
-    }
-
-    return material->emission + f * trace_res;
+    return material->emission + flux * trace(new_ray, new_depth, rng) / pdf;
 }
 
 void PTRenderer::render(Camera *camera, Canvas *canvas) {
@@ -165,6 +81,7 @@ void PTRenderer::render(Camera *camera, Canvas *canvas) {
             canvas->set(y, x, 1, clamp_int(color.y));
             canvas->set(y, x, 2, clamp_int(color.z));
         }
+        delete rng;
     }
 }
 

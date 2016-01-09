@@ -21,23 +21,52 @@
 namespace diorama {
 
 struct Photon : Vector {
+    Photon(const Vector &pos, const Vector &flux, const Vector &direction)
+            : Vector(pos), flux(flux), direction(direction) {
+
+    }
+
     Vector flux;
     Vector direction;
 };
 
+typedef Photon *ptr_photon_t;
 typedef VecKDTree<Photon> PhotonKDTree;
-typedef std::vector<Photon *> photon_vec_t;
+typedef std::vector<ptr_photon_t> photon_vec_t;
+
+enum class PhotonState : int {
+    Direct    = 0x0100,
+    Indirect  = 0x0101,
+    Caustic   = 0x0200,
+};
 
 class PhotonMap {
 public:
-    void initialize(Scene *scene);
+    struct PhotonDistanceCompare {
+        PhotonDistanceCompare(const Vector &center) : center(center) {
+
+        }
+
+        inline bool operator ()(const ptr_photon_t &lhs, const ptr_photon_t &rhs) {
+            return (*lhs - center).l2() < (*rhs - center).l2();
+        }
+
+        Vector center;
+    };
+
+    PhotonMap(Scene *scene = NULL, Scene *light = NULL) : _scene(scene), _light(light), _global(), _caustic(), _volume() {
+
+    }
+
+    void initialize();
     Vector sample(const Vector &position, const Vector &norm, int gather_num, double gather_r);
 
 private:
-    void find_knn(const Photon &photon, int gather_num, double gather_r, photon_vec_t &result);
-    void trace(Scene *scene, const Ray &ray, const Vector &flux, int depth, photon_vec_t &result, RandomStream *rand);
+    void find_knn(const Photon &center, int gather_num, double gather_r, photon_vec_t &result);
+    void trace(const Ray &ray, const Vector &flux, int depth, PhotonState state, RandomStream *rng);
 
     PhotonKDTree _global, _caustic, _volume;
+    Scene *_scene, *_light;
 };
 
 } // End namespace diorama

@@ -13,6 +13,7 @@
 #include "../core/common.h"
 #include "../core/vector3.h"
 #include "../core/ray.h"
+#include "../core/random.h"
 #include "../material/mtlbase.h"
 
 namespace diorama {
@@ -88,6 +89,7 @@ public:
     }
 
     virtual Intersection intersect(const Ray &ray) { return Intersection::null; }
+    virtual void sample(RandomStream *rng, Ray &ray, double &pdf) = 0;
 
     inline Object *set_material(Material *m) {
         material = m;
@@ -97,10 +99,6 @@ public:
     inline Object *add_to_scene(Scene *s) {
         s->add(this);
         return this;
-    }
-
-    inline void sample_diff(Ray &result) {
-
     }
 };
 

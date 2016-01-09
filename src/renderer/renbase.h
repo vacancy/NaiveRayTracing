@@ -24,19 +24,6 @@ class IRender {
     virtual void render(Camera *camera, Canvas *canvas) = 0;
 };
 
-class PMRender : public IRender {
-public:
-    PMRender(Scene *scene, int gather_num, double gather_r)
-            : _scene(scene), _gather_num(gather_num), _gather_r(gather_r) {
-
-    }
-
-protected:
-    Scene  *_scene;
-    int    _gather_num;
-    double _gather_r;
-};
-
 } // End namespace diorama
 
 #endif //RAYTRACE_RENDER_H

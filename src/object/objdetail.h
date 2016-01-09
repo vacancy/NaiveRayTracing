@@ -16,7 +16,6 @@ namespace diorama {
 
 class Triangle : public Object {
 public:
-
     Vector a, b, c, norm, nnorm, center;
     double d;
 
@@ -44,7 +43,47 @@ public:
         d = -dot(norm, a);
     }
 
+    inline double area() {
+        return abs(cross(c - a, b - a).len()) / 2;
+    }
+
     virtual Intersection intersect(const Ray &ray);
+    virtual void sample(RandomStream *rng, Ray &ray, double &pdf);
+};
+
+class Quad : public Object {
+public:
+    Triangle tri1, tri2;
+    double area1, area2;
+
+    Quad(void) { }
+
+    Quad(const Vector &a, const Vector &b, const Vector &c, const Vector &d) {
+        tri1 = Triangle(a, b, c);
+        tri2 = Triangle(a, c, d);
+        initialize();
+    }
+
+    inline void initialize(void) {
+        area1 = tri1.area();
+        area2 = tri2.area();
+    }
+
+    virtual Intersection intersect(const Ray &ray) {
+        Intersection inter = tri1.intersect(ray);
+        if (inter.object != NULL) {
+            inter.object = static_cast<Object *>(this);
+            return inter;
+        }
+        inter = tri2.intersect(ray);
+        if (inter.object != NULL)
+            inter.object = static_cast<Object *>(this);
+        return inter;
+    }
+    virtual void sample(RandomStream *rng, Ray &ray, double &pdf) {
+        if (rng->get() < area1 / (area1 + area2)) tri1.sample(rng, ray, pdf);
+        else tri2.sample(rng, ray, pdf);
+    }
 };
 
 std::ostream &operator<<(std::ostream &os, const Triangle &tri);
@@ -66,7 +105,12 @@ public:
         radius = r, sqrrad = r * r;
     }
 
+    inline double area() {
+        return sqrrad * 4 * pi;
+    }
+
     virtual Intersection intersect(const Ray &ray);
+    virtual void sample(RandomStream *rng, Ray &ray, double &pdf);
 };
 
 class Plane : public Object {
@@ -85,6 +129,9 @@ public:
     }
 
     virtual Intersection intersect(const Ray &ray);
+    virtual void sample(RandomStream *rng, Ray &ray, double &pdf) {
+
+    }
 };
 
 } // End namespace diorama

@@ -12,12 +12,16 @@
 
 const int SAMPLE_X = 2;
 const int SAMPLE_Y = 2;
-const int SAMPLE = 25;
+const int SAMPLE = 5;
 const int SAMPLE_XY = SAMPLE_X * SAMPLE_Y;
 const int SAMPLE_ALL = SAMPLE * SAMPLE_XY;
 
-const int h = 128, w = 128;
-const int MAX_DEPTH = 10;
+const int PHOTON_SAMPLE = 100;
+const int PHOTON_GLOBAL  = 1000;
+const int PHOTON_CAUSTIC = 1000;
+
+const int h = 512, w = 512;
+const int MAX_DEPTH = 5;
 const int SCENE_ID = 4;
 const int DEBUG = false;
 

@@ -54,6 +54,9 @@ public:
     }
 
     virtual Intersection intersect(const Ray &ray);
+    virtual void sample(RandomStream *rng, Ray &ray, double &pdf) {
+
+    }
 
     static TriangleMesh *from_stream(std::istream &f, Material *material, const Vector &resize, const Vector &delta);
 

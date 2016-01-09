@@ -12,30 +12,23 @@
 
 #include "../core/common.h"
 #include "../core/vector3.h"
+#include "../core/ray.h"
+#include "../core/random.h"
 
 namespace diorama {
 
 class Material {
-
-};
-
-class Phong : public Material {
 public:
-    Vector emission, color, c_color;
-    double color_max;
-    double k_diff, k_spec;
-    double beta = 1.5;
-    int  n_spec;
-    bool have_refr;
-
-    Phong(void) { }
-
-    Phong(const Vector &c, const Vector &e, double k_diff, double k_spec=0, int n_spec=1, bool have_refr=false)
-            : k_diff(k_diff), k_spec(k_spec), n_spec(n_spec), color(c), emission(e), have_refr(have_refr) {
-
-        color_max = std::max(color.x, std::max(color.y, color.z));
-        c_color = color / color_max;
+    Material(const Vector &color, const Vector &emission) : color(color), emission(emission) {
+        max_color = color.max();
+        normed_color = color / max_color;
     }
+
+    virtual void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,
+                       Ray &out, double &pdf) = 0;
+
+    Vector color, emission, normed_color;
+    double max_color;
 };
 
 } // End namespace diorama

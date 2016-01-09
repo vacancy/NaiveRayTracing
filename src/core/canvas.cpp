@@ -13,10 +13,11 @@
 
 namespace diorama {
 
-void Canvas::show(const std::string &windowname) {
+void Canvas::show(const std::string &windowname, bool wait) {
     cv::Mat res = _to_mat();
     cv::imshow(windowname, res);
-    cv::waitKey(0);
+    if (wait)
+        cv::waitKey(0);
 }
 
 void Canvas::write(const std::string &filename) {

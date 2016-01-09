@@ -27,7 +27,7 @@ Vector DepthRenderer::trace(const Ray &ray) {
         return Vector::Zero;
     }
     Object *object = inter.object;
-    Phong *material = static_cast<Phong *>(object->material);
+    Material *material = object->material;
     return material->color / inter.distance;
 }
 
