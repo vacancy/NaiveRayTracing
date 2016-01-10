@@ -14,7 +14,7 @@
 
 namespace diorama {
 
-class DepthRenderer : public IRender {
+class DepthRenderer : public Renderer {
 public:
     DepthRenderer(Scene *scene, double norm = 1) : _scene(scene), _norm(norm) { }
 

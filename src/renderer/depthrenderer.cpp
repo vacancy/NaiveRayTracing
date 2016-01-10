@@ -34,12 +34,13 @@ Vector DepthRenderer::trace(const Ray &ray) {
 void DepthRenderer::render(Camera *camera, Canvas *canvas) {
     int h = canvas->h, w = canvas->w;
 
+    RandomStream *rng = new LCGStream(19961018 + rand());
     for (int y = 0; y < h; ++y) {
         fprintf(stderr, "\rRendering %5.2f%%", 100. * y / (h - 1));
         for (int x = 0; x < w; ++x) {
             double sy = 1.0 - (double(y) / h);
             double sx = double(x) / w;
-            Ray ray = camera->generate(sx, sy);
+            Ray ray = camera->generate(sx, sy, rng);
             Vector color = trace(ray);
             color = color * _norm;
             canvas->set(y, x, 0, clamp_int(color.x));
@@ -47,6 +48,8 @@ void DepthRenderer::render(Camera *camera, Canvas *canvas) {
             canvas->set(y, x, 2, clamp_int(color.z));
         }
     }
+    fprintf(stderr, "\rDepth rendering finished\n");
+    delete rng;
 }
 
 } // End namespace diorama

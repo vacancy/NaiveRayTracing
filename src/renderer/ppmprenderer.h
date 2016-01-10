@@ -16,26 +16,22 @@
 
 namespace diorama {
 
-class PPMPRenderer : IRender {
+class PPMPRenderer : Renderer {
 public:
-    PPMPRenderer(Scene *scene, Scene *light, int gather_num, double gather_r, int max_depth)
-        : _scene(scene), _light(light),
-          _gather_num(gather_num), _gather_r(gather_r), _max_depth(max_depth) {
+    PPMPRenderer(Scene *scene, Scene *light, int max_depth)
+        : _scene(scene), _light(light), _max_depth(max_depth) {
 
-        _photon_map = new PhotonMap(scene, light);
     }
 
     virtual ~PPMPRenderer() {
         delete _photon_map;
     }
 
-    Vector trace(const Ray &ray, int depth, LCGStream *rng);
+    Vector trace(const Ray &ray, int depth, LCGStream *rng, int global_n, double global_r, int caustic_n, double caustic_r);
     virtual void render(Camera *camera, Canvas *canvas);
 
 protected:
     Scene  *_scene, *_light;
-    int    _gather_num;
-    double _gather_r;
     int    _max_depth;
 
     PhotonMap *_photon_map;

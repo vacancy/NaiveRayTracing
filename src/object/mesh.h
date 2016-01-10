@@ -51,6 +51,7 @@ public:
             if (v.z > vmax.z) vmax.z = v.z;
         }
         _bbox = BoundingBox(vmin, vmax);
+        std::cout << _bbox.vmin << _bbox.vmax << std::endl;
     }
 
     virtual Intersection intersect(const Ray &ray);

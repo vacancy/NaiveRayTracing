@@ -83,6 +83,7 @@ public:
     virtual void sample(RandomStream *rng, Ray &ray, double &pdf) {
         if (rng->get() < area1 / (area1 + area2)) tri1.sample(rng, ray, pdf);
         else tri2.sample(rng, ray, pdf);
+        pdf = 1 / (area1 + area2);
     }
 };
 
@@ -131,6 +132,17 @@ public:
     virtual Intersection intersect(const Ray &ray);
     virtual void sample(RandomStream *rng, Ray &ray, double &pdf) {
 
+    }
+};
+
+class PlaneQuad : public Plane {
+public:
+    PlaneQuad(void) { }
+
+    PlaneQuad(const Vector &a, const Vector &b, const Vector &c, const Vector &d) {
+        point = d;
+        norm = cross(b-a, c-a);
+        initialize();
     }
 };
 

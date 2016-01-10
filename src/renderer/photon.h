@@ -59,10 +59,10 @@ public:
     }
 
     void initialize();
-    Vector sample(const Vector &position, const Vector &norm, int gather_num, double gather_r);
+    Vector sample(const Vector &position, const Vector &norm, int global_n, double global_r, int caustic_n, double caustic_r);
 
 private:
-    void find_knn(const Photon &center, int gather_num, double gather_r, photon_vec_t &result);
+    void find_knn(const Photon &center, int global_n, double global_r, int caustic_n, double caustic_r, photon_vec_t &global_result, photon_vec_t &caustic_result);
     void trace(const Ray &ray, const Vector &flux, int depth, PhotonState state, RandomStream *rng);
 
     PhotonKDTree _global, _caustic, _volume;

@@ -15,6 +15,41 @@ using std::endl;
 
 namespace diorama {
 
+void PTRenderer::render(Camera *camera, Canvas *canvas) {
+    int h = canvas->h, w = canvas->w;
+
+#pragma omp parallel for schedule(dynamic, 1)
+    for (int y = 0; y < h; ++y) {
+        LCGStream *rng = new LCGStream(19961018 + y);
+        fprintf(stderr, "\rRendering (%d spp) %5.2f%%", SAMPLE_ALL, 100. * y / (h - 1));
+        for (int x = 0; x < w; ++x) {
+            Vector color = Vector::Zero;
+            for (int i = 0; i < SAMPLE_Y; ++i) {
+                for (int j = 0; j < SAMPLE_X; ++j) {
+                    double sy = 1.0 - (double(y) / h + 1.0 / h * i);
+                    double sx = double(x) / w + 1.0 / h * j;
+                    Ray ray = camera->generate(sx, sy, rng + rand());
+
+                    Vector sub_color = Vector::Zero;
+                    for (int k = 0; k < SAMPLE; ++k) {
+                        Vector tmp = trace(ray, 0, rng);
+                        sub_color = sub_color + tmp / double(SAMPLE);
+                    }
+                    color = color + Vector(
+                        clamp(sub_color.x),
+                        clamp(sub_color.y),
+                        clamp(sub_color.z)
+                    ) / SAMPLE_XY;
+                }
+            }
+            canvas->set(y, x, 0, clamp_int(color.x));
+            canvas->set(y, x, 1, clamp_int(color.y));
+            canvas->set(y, x, 2, clamp_int(color.z));
+        }
+        delete rng;
+    }
+}
+
 Vector PTRenderer::trace(const Ray &ray, int depth, LCGStream *rng) {
     Intersection inter = _scene->intersect(ray);
     if (DEBUG) {
@@ -48,41 +83,6 @@ Vector PTRenderer::trace(const Ray &ray, int depth, LCGStream *rng) {
     material->sample(ray, pos, norm, rng, new_ray, pdf);
 
     return material->emission + flux * trace(new_ray, new_depth, rng) / pdf;
-}
-
-void PTRenderer::render(Camera *camera, Canvas *canvas) {
-    int h = canvas->h, w = canvas->w;
-
-#pragma omp parallel for schedule(dynamic, 1)
-    for (int y = 0; y < h; ++y) {
-        LCGStream *rng = new LCGStream(19961018 + y);
-        fprintf(stderr, "\rRendering (%d spp) %5.2f%%", SAMPLE_ALL, 100. * y / (h - 1));
-        for (int x = 0; x < w; ++x) {
-            Vector color = Vector::Zero;
-            for (int i = 0; i < SAMPLE_Y; ++i) {
-                for (int j = 0; j < SAMPLE_X; ++j) {
-                    double sy = 1.0 - (double(y) / h + 1.0 / h * i);
-                    double sx = double(x) / w + 1.0 / h * j;
-                    Ray ray = camera->generate(sx, sy);
-
-                    Vector sub_color = Vector::Zero;
-                    for (int k = 0; k < SAMPLE; ++k) {
-                        Vector tmp = trace(ray, 0, rng);
-                        sub_color = sub_color + tmp / double(SAMPLE);
-                    }
-                    color = color + Vector(
-                            clamp(sub_color.x),
-                            clamp(sub_color.y),
-                            clamp(sub_color.z)
-                    ) / SAMPLE_XY;
-                }
-            }
-            canvas->set(y, x, 0, clamp_int(color.x));
-            canvas->set(y, x, 1, clamp_int(color.y));
-            canvas->set(y, x, 2, clamp_int(color.z));
-        }
-        delete rng;
-    }
 }
 
 } // End namespace diorama

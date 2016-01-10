@@ -52,7 +52,7 @@ public:
 
 class LambertianBRDF : public BRDF {
 public:
-    LambertianBRDF(const Vector &color, const Vector &emission) : BRDF(color, emission) {
+    LambertianBRDF(const Vector &color, const Vector &emission = Vector::Zero) : BRDF(color, emission) {
 
     }
 
@@ -70,7 +70,7 @@ public:
 
 class SpecularBRDF : public BRDF {
 public:
-    SpecularBRDF(const Vector &color, const Vector &emission) : BRDF(color, emission) {
+    SpecularBRDF(const Vector &color, const Vector &emission = Vector::Zero) : BRDF(color, emission) {
 
     }
 
@@ -118,12 +118,19 @@ public:
 
 class BTDF : public BSDF {
 public:
-    BTDF(const Vector &color, const Vector &emmision, double beta=1.5) : BSDF(color, emission), beta(beta) {
+    BTDF(const Vector &color, const Vector &emmision = Vector::Zero, double beta = 1.5) : BSDF(color, emission), beta(beta) {
 
     }
 
-    virtual void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,
+    virtual inline void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,
                         Ray &out, double &pdf) {
+
+        sample(in, pos, norm, rng, out, pdf, 0);
+    }
+
+    // next_id: 0 - random, 1 - reflection, 2 - refraction
+    virtual void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,
+                        Ray &out, double &pdf, int next_id) {
 
         Vector abs_norm = (dot(norm, in.direct) < 0) ? norm : norm * -1;
         bool   into = dot(norm, abs_norm) > 0;
@@ -136,8 +143,13 @@ public:
 
         out.origin = pos;
         if (cos2t < 0) {
-            out.direct = d_refl;
-            pdf = 1;
+            if (next_id == 0 || next_id == 1) {
+                out.direct = d_refl;
+                pdf = 1;
+            } else {
+                pdf = 0;
+            }
+
         } else {
             Vector d_refr = (in.direct * nnt - norm * ((into ? 1 : -1) * (ddn * nnt + sqrt(cos2t)))).norm();
 
@@ -148,12 +160,20 @@ public:
             double Tr = 1 - Re;
             double P = 0.25 + 0.5 * Re;
 
-            if (rng->get() < P) {
+            if (next_id == 0) {
+                if (rng->get() < P) {
+                    out.direct = d_refl;
+                    pdf = P / Re;
+                } else {
+                    out.direct = d_refr;
+                    pdf = (1 - P) / Tr;
+                }
+            } else if (next_id == 1) {
                 out.direct = d_refl;
-                pdf = P / Re;
-            } else {
+                pdf = Re;
+            } else if (next_id == 2) {
                 out.direct = d_refr;
-                pdf = (1 - P) / Tr;
+                pdf = Tr;
             }
         }
     }

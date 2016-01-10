@@ -14,7 +14,7 @@
 
 namespace diorama {
 
-class PTRenderer : public IRender {
+class PTRenderer : public Renderer {
 public:
     PTRenderer(Scene *scene, int max_depth = 10) : _scene(scene), _max_depth(max_depth) {
 

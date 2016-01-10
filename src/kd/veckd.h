@@ -11,13 +11,12 @@
 #define RAYTRACE_VECKD_H
 
 #include "kdbase.h"
+#include <queue>
 
 using std::cerr;
 using std::endl;
 
 namespace diorama {
-
-extern bool debug_kdtree;
 
 template <typename T>
 class VecKDTree {
@@ -27,6 +26,8 @@ public:
     typedef T *ptr_vector_t;
     typedef std::vector<ptr_vector_t> list_t;
     typedef typename list_t::iterator list_iter_t;
+    typedef std::pair<double, ptr_vector_t> knn_res_t;
+    typedef typename std::priority_queue<knn_res_t> knn_queue_t;
 
     struct VecKDNode : KDNodeBase<VecKDNode, value_t> {
         VecKDNode(void) : KDNodeBase<VecKDNode, value_t>() { }
@@ -53,12 +54,28 @@ public:
         initialize();
     }
 
+    virtual ~VecKDTree() {
+        for (ptr_vector_t v : wrapper)
+            delete v;
+    }
+
     inline void initialize() { _build(root, wrapper.begin(), wrapper.end(), 0); }
 
     inline list_t find_r(const vector_t &center, const value_t r) {
-        if (debug_kdtree) cerr << endl << "new_find_r" << endl;
         list_t res;
         _traverse_r(res, root, center, r*r);
+        return res;
+    }
+    inline list_t find_knn(const vector_t &center, const value_t r, int num) {
+        knn_queue_t pq;
+        value_t r2 = r * r;
+        _traverse_knn_r(pq, root, center, r2, num);
+        list_t res;
+        while (!pq.empty()) {
+            knn_res_t r = pq.top();
+            res.push_back(r.second);
+            pq.pop();
+        }
         return res;
     }
 
@@ -99,7 +116,6 @@ protected:
 
     void _traverse_r(list_t &res, const VecKDNode *root, const vector_t &center, const value_t r2) {
         if (!root) return ;
-        if (debug_kdtree) cerr << center << " " << root->axis << " " << root->split << " " << root->is_leaf() << endl;
 
         if (root->is_leaf()) {
             for (auto v : root->vectors) {
@@ -117,21 +133,33 @@ protected:
                 if (!ignore) _traverse_r(res, root->lson, center, r2);
             }
         }
+    }
 
-//        int first = pos[cur->dim] > cur->split, second = !first;
-//        VecKDNode *lson = first == 0 ? root->lson : root->rson;
-//        VecKDNode *rson = second == 0 ? root->lson : root->rson;
-//        real dist = (cur->t->getPos() - pos).L2();
-//        if (dist < r2)
-//            res.push_back(cur->t);
-//        if ((cur->ch >> first) & 1){
-//            if (a[root * 2 + first].b->minDist2(pos) < radius2)
-//                _traverse_r(res, lson, center, r2);
-//        }
-//        if ((cur->ch >> second) & 1){
-//            if (a[root * 2 + second].b->minDist2(pos) < radius2)
-//                _traverse_r(res, rson, center, r2);
-//        }
+    void _traverse_knn_r(knn_queue_t &res, const VecKDNode *root, const vector_t &center, value_t &r2, int num) {
+        if (!root) return ;
+
+        if (root->is_leaf()) {
+            for (auto v : root->vectors) {
+                value_t dis2 = (*v - center).l2();
+                if (dis2 < r2) {
+                    res.push(knn_res_t(dis2, v));
+                    if (res.size() > num) {
+                        res.pop();
+                        r2 = (*(res.top().second) - center).l2();
+                    }
+                }
+            }
+        } else {
+            bool in_left = center[root->axis] < root->split;
+            bool ignore = (center[root->axis] - root->split) * (center[root->axis] - root->split) > r2 + bigeps;
+            if (in_left) {
+                _traverse_knn_r(res, root->lson, center, r2, num);
+                if (!ignore) _traverse_knn_r(res, root->rson, center, r2, num);
+            } else {
+                _traverse_knn_r(res, root->rson, center, r2, num);
+                if (!ignore) _traverse_knn_r(res, root->lson, center, r2, num);
+            }
+        }
     }
 
 private:

@@ -20,7 +20,7 @@
 
 namespace diorama {
 
-class IRender {
+class Renderer {
     virtual void render(Camera *camera, Canvas *canvas) = 0;
 };
 

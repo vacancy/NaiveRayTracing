@@ -58,6 +58,22 @@ public:
         return result;
     }
 
+    inline Ray sample_disk(const Vector &center, double r, const Vector &norm) {
+        double r0 = sqrt(get());
+        double r1 = get() * (2.0 * pi);
+        double rx = r * r0 * cos(r1);
+        double ry = r * r0 * sin(r1);
+
+        Vector w = norm;
+        Vector wo = w.x < -0.1 || w.x > 0.1 ? Vector::YAxis : Vector::XAxis;
+        Vector u = cross(wo, w).norm();
+        Vector v = cross(w, u);
+
+        Ray result;
+        result.origin = center + u * rx + v * ry;
+        result.direct = norm;
+        return result;
+    }
 };
 
 class LCGStream : public RandomStream {
