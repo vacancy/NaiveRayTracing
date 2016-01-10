@@ -19,6 +19,8 @@ enum class BSDFType : int {
     Scatter     = 0x0200,
     Dielectric  = 0x0400,
 
+    Mixed       = 0x0610,
+
     None        = 0x0000,
     Lambertian  = 0x0001 | Scatter,
     Specular    = 0x0002 | Dielectric,
@@ -181,6 +183,36 @@ public:
     virtual BSDFType get_type() const { return BSDFType::Refractive; }
 
     double beta;
+};
+
+class MixedBSDF : public BSDF {
+public:
+    LambertianBRDF *diff;
+    SpecularBRDF *spec;
+    BTDF *refr;
+    double k1, k2, k3;
+
+    MixedBSDF(LambertianBRDF *diff, SpecularBRDF *spec, BTDF *refr, double k1, double k2, double k3) : BSDF(diff->color, diff->emission), diff(diff), spec(spec), refr(refr), k1(k1), k2(k2), k3(k3) {
+
+    }
+
+    virtual void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,  Ray &out, double &pdf) {
+        double r = rng->get();
+        if (r < k1 - eps) {
+            diff->sample(in, pos, norm, rng, out, pdf);
+            pdf *= k1;
+        } else if (r < k1 + k2 - eps) {
+            spec->sample(in, pos, norm, rng, out, pdf);
+            pdf *= k2;
+        } else if (r < k1 + k2 + k3 - eps) {
+            refr->sample(in, pos, norm, rng, out, pdf);
+            pdf *= k3;
+        } else {
+            pdf = eps;
+        }
+    }
+
+    virtual BSDFType get_type() const { return BSDFType::Mixed; }
 };
 
 

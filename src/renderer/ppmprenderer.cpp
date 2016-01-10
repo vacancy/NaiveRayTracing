@@ -103,14 +103,16 @@ Vector PPMPRenderer::trace(const Ray &ray, int depth, LCGStream *rng,
     if (is_max_depth || (use_rr && !roulette)) {
         return material->emission;
     }
-    Vector flux = (use_rr && roulette) ? material->normed_color : material->color;
+    Vector flux = material->color;
     Vector norm = inter.norm;
     Vector pos = inter.position;
     Vector radiance = Vector::Zero;
 
     if (material->get_type() & BSDFType::Scatter) {
         radiance = _photon_map->sample(pos, norm, global_n, global_r, caustic_n, caustic_r);
-    } else {
+    }
+
+    if (material->get_type() & BSDFType::Dielectric){
         if (material->get_type() == BSDFType::Refractive && new_depth < 5) {
             BTDF *btdf = static_cast<BTDF *>(material);
             Ray new_ray1, new_ray2; double pdf1, pdf2;

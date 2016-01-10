@@ -20,7 +20,7 @@ void PTRenderer::render(Camera *camera, Canvas *canvas) {
 
 #pragma omp parallel for schedule(dynamic, 1)
     for (int y = 0; y < h; ++y) {
-        LCGStream *rng = new LCGStream(19961018 + y);
+        LCGStream *rng = new LCGStream(19961018 + y + rand());
         fprintf(stderr, "\rRendering (%d spp) %5.2f%%", SAMPLE_ALL, 100. * y / (h - 1));
         for (int x = 0; x < w; ++x) {
             Vector color = Vector::Zero;
@@ -28,7 +28,7 @@ void PTRenderer::render(Camera *camera, Canvas *canvas) {
                 for (int j = 0; j < SAMPLE_X; ++j) {
                     double sy = 1.0 - (double(y) / h + 1.0 / h * i);
                     double sx = double(x) / w + 1.0 / h * j;
-                    Ray ray = camera->generate(sx, sy, rng + rand());
+                    Ray ray = camera->generate(sx, sy, rng);
 
                     Vector sub_color = Vector::Zero;
                     for (int k = 0; k < SAMPLE; ++k) {

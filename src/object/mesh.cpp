@@ -31,7 +31,7 @@ Intersection TriangleMesh::intersect(const Ray &ray) {
 TriangleMesh* TriangleMesh::from_stream(std::istream &f, Material *material, const Vector &resize,
                                                const Vector &delta) {
     TriangleMesh *mesh = new TriangleMesh();
-    TriangleMesh::triangle_vec_t &triangels = mesh->_triangles;
+    TriangleMesh::triangle_vec_t &triangles = mesh->_triangles;
     TriangleMesh::vertex_vec_t vertexes;
 
     char buffer[128];
@@ -48,9 +48,12 @@ TriangleMesh* TriangleMesh::from_stream(std::istream &f, Material *material, con
             char op;
             int x, y, z;
             sscanf(buffer, "%c %d %d %d", &op, &x, &y, &z);
+            if (x == y || y == z || x == z)
+                continue;
             Triangle *triangle = new Triangle(vertexes[x - 1], vertexes[y - 1], vertexes[z - 1]);
             triangle->set_material(material);
-            triangels.push_back(triangle);
+            triangles.push_back(triangle);
+
         }
     }
 

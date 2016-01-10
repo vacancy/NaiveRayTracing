@@ -24,6 +24,9 @@ inline static int get_triangle_side(const Triangle *triangle, int axis, double s
     return 0;
 }
 
+using std::cerr;
+using std::endl;
+
 void ObjKDTree::_build(ObjKDNode *&root, const std::vector<Triangle *> &a, BoundingBox bbox, int current) {
     if (a.empty()) {
         return;

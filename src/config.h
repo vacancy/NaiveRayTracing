@@ -12,11 +12,11 @@
 
 const int SAMPLE_X = 1;
 const int SAMPLE_Y = 1;
-const int SAMPLE = 40;
+const int SAMPLE = 8;
 const int SAMPLE_XY = SAMPLE_X * SAMPLE_Y;
 const int SAMPLE_ALL = SAMPLE * SAMPLE_XY;
 
-const int PHOTON_SAMPLE = 1000000;
+const int PHOTON_SAMPLE = 100000;
 const int PHOTON_GLOBAL  = 10000000;
 const int PHOTON_CAUSTIC = 0;
 
