@@ -171,7 +171,6 @@ void PhotonMap::trace(const Ray &ray, const Vector &flux, int depth, PhotonState
     Vector trace_res = Vector::Zero;
 
     double photon_pdf = 1.0;
-    bool absorb = false;
     if (material->get_type() & BSDFType::Scatter) {
 //        if (state == PhotonState::Caustic) {
 //            if (_caustic.wrapper.size() < PHOTON_CAUSTIC)
@@ -181,12 +180,12 @@ void PhotonMap::trace(const Ray &ray, const Vector &flux, int depth, PhotonState
                 _global.wrapper.push_back(new Photon(pos, flux, ray.direct));
 //        }
 
-//        const double prob = current_flux.mean();
-//        if (rng->get() < prob) {
-//            photon_pdf *= prob;
-//        } else {
-//            absorb = true;
-//        }
+        const double prob = current_flux.mean();
+        if (rng->get() < prob) {
+            photon_pdf *= prob;
+        } else {
+            return ;
+        }
     }
 
     PhotonState new_state = state;

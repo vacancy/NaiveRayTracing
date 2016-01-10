@@ -80,7 +80,7 @@ void make_scene(Scene *scene, Scene *light, Camera *&camera) {
 
     ifstream kitten_f("models/kitten.50k.obj", ios::in);
     TriangleMesh *kitten = TriangleMesh::from_stream(
-        kitten_f, new MixedBSDF(new LambertianBRDF(Vector(0.75, 0.25, 0.25)), new SpecularBRDF(Vector(0.999, 0.999, 0.999)), NULL, 0.4, 0.4, 0),
+        kitten_f, new LambertianBRDF(Vector(0.75, 0.25, 0.25)),
         Vector(0.12, 0.12, 0.12), Vector(-1.75, -9.6, 2.5));
     kitten_f.close();
     ObjKDTree *kitten_kd = new ObjKDTree(kitten);
