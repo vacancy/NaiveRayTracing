@@ -57,6 +57,14 @@ public:
     virtual ~VecKDTree() {
         for (ptr_vector_t v : wrapper)
             delete v;
+        destruct(root);
+    }
+
+    void destruct(VecKDNode *root) {
+        if (root == NULL) return ;
+        destruct(root->lson);
+        destruct(root->rson);
+        delete root;
     }
 
     inline void initialize() { _build(root, wrapper.begin(), wrapper.end(), 0); }
