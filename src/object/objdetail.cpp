@@ -114,6 +114,8 @@ Intersection Plane::intersect(const Ray &ray) {
     res.distance = -b / a;
     res.position = ray.get(res.distance);
     res.norm = norm;
+    if (bump != NULL)
+        res.norm = bump->get(res.position, res.norm);
     return res;
 }
 

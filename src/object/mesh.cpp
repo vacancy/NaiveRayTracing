@@ -29,10 +29,13 @@ Intersection TriangleMesh::intersect(const Ray &ray) {
 }
 
 TriangleMesh* TriangleMesh::from_stream(std::istream &f, Material *material, const Vector &resize,
-                                               const Vector &delta) {
+                                               const Vector &delta, bool flip_normal) {
     TriangleMesh *mesh = new TriangleMesh();
     TriangleMesh::triangle_vec_t &triangles = mesh->_triangles;
     TriangleMesh::vertex_vec_t vertexes;
+
+    std::vector<int> fx, fy, fz;
+    fx.clear(), fy.clear(), fz.clear();
 
     char buffer[128];
     while (f.getline(buffer, 128)) {
@@ -50,11 +53,16 @@ TriangleMesh* TriangleMesh::from_stream(std::istream &f, Material *material, con
             sscanf(buffer, "%c %d %d %d", &op, &x, &y, &z);
             if (x == y || y == z || x == z)
                 continue;
-            Triangle *triangle = new Triangle(vertexes[x - 1], vertexes[y - 1], vertexes[z - 1]);
-            triangle->set_material(material);
-            triangles.push_back(triangle);
-
+            fx.push_back(x), fy.push_back(y), fz.push_back(z);
         }
+    }
+
+    for (size_t i = 0; i < fx.size(); ++i) {
+        int x = fx[i], y = fy[i], z = fz[i];
+        if (flip_normal) std::swap(x, y);
+        Triangle *triangle = new Triangle(vertexes[x - 1], vertexes[y - 1], vertexes[z - 1]);
+        triangle->set_material(material);
+        triangles.push_back(triangle);
     }
 
     mesh->initialize(vertexes);

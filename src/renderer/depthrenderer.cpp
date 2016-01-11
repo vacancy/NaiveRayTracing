@@ -11,6 +11,7 @@
 #include "../config.h"
 
 using std::cout;
+using std::cerr;
 using std::endl;
 
 namespace diorama {

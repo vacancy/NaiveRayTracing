@@ -144,7 +144,7 @@ void make_scene_pt(Scene *scene, Scene *lt, Camera *&camera) {
 //        new SpecularBRDF(new ConstantTexture<Vector>(Vector(0.99, 0.99, 0.99)))
 //    ))->add_to_scene(scene);
     sphere2->set_material(new SimpleMaterial(
-        new RefractiveBTDF(new ConstantTexture<Vector>(Vector(0.99, 0.99, 0.99)))
+        new LambertianSpecularBSDF(new ConstantTexture<Vector>(Vector(0.75, 0.75, 0.75)), 0.7)
     ))->add_to_scene(scene);
 
     ifstream kitten_f("models/kitten.50k.obj", ios::in);
@@ -211,8 +211,70 @@ void make_scene_dof(Scene *scene, Scene *lt, Camera *&camera) {
     ObjKDTree *dragon2kd = new ObjKDTree(dragon2);
     dragon2kd->add_to_scene(scene);
 
-    camera = new PerspectiveCamera(Vector(0, 1, -13.75), Vector(0, -.1, 1).norm(), Vector(0, 1, 0), 30);
-    camera = new DoFCamera(Vector(0, 1, -13.75), Vector(0, -.1, 1).norm(), Vector(0, 1, 0), 30, 0.33, 11.25);
+//    camera = new PerspectiveCamera(Vector(0, 1, -13.75), Vector(0, -.1, 1).norm(), Vector(0, 1, 0), 30);
+    camera = new DoFCamera(Vector(0, 1, -13.75), Vector(0, -.1, 1).norm(), Vector(0, 1, 0), 30, 0.034, 11.25);
+}
+
+void big_helper(Scene *scene, string filename, Material *mat, bool flip_norm=true) {
+    ifstream f(filename, ios::in);
+    TriangleMesh *mesh = TriangleMesh::from_stream(f, mat, Vector(1, 1, 1), Vector::Zero, flip_norm);
+    f.close();
+    ObjKDTree *kd = new ObjKDTree(mesh);
+    kd->add_to_scene(scene);
+}
+void make_scene_big(Scene *scene, Scene *light, Camera *&camera) {
+    Plane *floor = new Plane(Vector(0, 0, 0), Vector(0, 1, 0));
+    floor->set_material(new SimpleMaterial(new LambertianBRDF(new BmpTexture("models/Chene_huile_naturel.jpg", Vector(-200, -50, 0), Vector(1, 0, 0), Vector(0, 0, -1), 20, 20, 2.2))));
+    floor->set_bump(new BumpTexture("models/Chene_huile_naturel_bump.jpg", Vector(-200, -50, 0), Vector(1, 0, 0), Vector(0, 0, -1), 20, 20, 2.2, 5));
+    floor->add_to_scene(scene);
+    Plane *wall = new Plane(Vector(0, 0, -76), Vector(0, 0, 1));
+    wall->set_material(new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(0.2078, 0.3922, 0.3647)))));
+    wall->set_bump(new BumpTexture("models/AS2_cloth_10_bump.jpg", Vector(0, 0, -76), Vector(1, 0, 0), Vector(0, -1, 0), 20, 20, 2.2, 100));
+    wall->add_to_scene(scene);
+
+    big_helper(scene, "models/8.1.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(0.75, 0.75, 0.75)))));
+//    big_helper(scene, "models/1.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(0.5647, 0.3333, 0.1764)))));
+    big_helper(scene, "models/1.obj", new SimpleMaterial(new LambertianBRDF(new BmpTexture("models/ch_2234_t_antique_oxford_0.jpg", Vector(0, 0, 0), Vector(1, 0, 0), Vector(0, -1, -1).norm(), 20, 20, 2.2))));
+    big_helper(scene, "models/2.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(214./255, 204./255, 193./255)))));
+    big_helper(scene, "models/3.obj", new SimpleMaterial(new RefractiveBTDF(new ConstantTexture<Vector>(Vector(0.999, 0.999, 0.999)))), false);
+//    big_helper(scene, "models/3.obj", new SimpleMaterial(new LambertianSpecularBSDF(new ConstantTexture<Vector>(Vector(0.88, 0.88, 0.88)), 0.)));
+    big_helper(scene, "models/4.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(52./255, 86./255, 22./255)))));
+    big_helper(scene, "models/5.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(102./255, 123./255, 142./255)))));
+    big_helper(scene, "models/6.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(102./255, 123./255, 142./255)))));
+
+    {
+        Vector l00(16.0721, 99.4089, -73.0000);
+        Vector l01(-14.0867, 99.4089, -73.0000);
+        Vector l10(-14.0867, 56.6286, -73.0000);
+        Vector l11(16.0721, 56.6286, -73.0000);
+        Object *quad = new Quad(l11, l10, l01, l00);
+        quad->set_material(
+            new SimpleMaterial(new LambertianBRDF(
+                new BmpTexture("models/alonesky.jpg", Vector(-14.0867, 56.6286, -73.0000), Vector(1, 0, 0), Vector(0, -1, 0), 20.4915, 20.523, 2.2)
+            ))
+        );
+        quad->add_to_scene(scene);
+    }
+    {
+        Vector l00(118.0322, 90.6049, -52.5106);
+        Vector l01(118.0322, 17.6197, -52.5106);
+        Vector l10(118.0322, 90.6049, 7.8514);
+        Vector l11(118.0322, 17.6197, 7.8514);
+        Object *quad = new Quad(l00, l01, l10, l11);
+        quad->set_light(new SimpleLight(Vector(50, 50, 50)));
+        quad->add_to_scene(scene)->add_to_scene(light);
+    }
+    {
+        Vector l00(394.3732, 244.5573, -25.3815);
+        Vector l01(443.0328, 161.4010, -12.3249);
+        Vector l10(373.0712, 248.3344, 78.0624);
+        Vector l11(421.7308, 165.1782, 91.1191);
+        Object *quad = new Quad(l00, l01, l10, l11);
+        quad->set_light(new SimpleLight(Vector(250, 250, 250)));
+        quad->add_to_scene(scene)->add_to_scene(light);
+    }
+
+    camera = new PerspectiveCamera2(Vector(0, 100, 500), Vector(0, -0.1, -1).norm(), Vector(0, 1, 0), 20, 15);
 }
 
 int main(int argc, char *argv[]) {
@@ -227,20 +289,21 @@ int main(int argc, char *argv[]) {
     Camera *camera;
 //    make_scene(scene, light, camera);
 //    make_scene_pt(scene, light, camera);
-    make_scene_dof(scene, light, camera);
+//    make_scene_dof(scene, light, camera);
+    make_scene_big(scene, light, camera);
 
-    DepthRenderer *depth_render = new DepthRenderer(scene, 1);
+    DepthRenderer *depth_render = new DepthRenderer(scene, 150);
     depth_render->render(camera, depth_canvas);
     depth_canvas->write("result_depth.bmp");
-    depth_canvas->show("Depth", true);
+    depth_canvas->show("Depth", false);
 
     PTRenderer *pt_render = new PTRenderer(scene, MAX_DEPTH);
     pt_render->render(camera, pt_canvas);
     pt_canvas->write("result_pt.bmp");
-//    pt_canvas->show("PathTracing", true);
+    pt_canvas->show("PathTracing");
 
-//    PPMPRenderer *pm_render = new PPMPRenderer(scene, light, MAX_DEPTH);
-//    pm_render->render(camera, pm_canvas);
+    PPMPRenderer *pm_render = new PPMPRenderer(scene, light, MAX_DEPTH);
+    pm_render->render(camera, pm_canvas);
 
     return 0;
 }

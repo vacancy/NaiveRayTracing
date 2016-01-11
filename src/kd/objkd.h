@@ -24,7 +24,7 @@ public:
         TriangleMesh mesh;
     };
 
-    ObjKDTree(TriangleMesh *wrapper, int max_leaf_size = 30)
+    ObjKDTree(TriangleMesh *wrapper, int max_leaf_size = 64)
             : wrapper(wrapper), root(NULL), _max_leaf_size(max_leaf_size) {
 
         initialize();
@@ -46,7 +46,7 @@ protected:
     Intersection _traverse(ObjKDNode *root, const Ray &ray);
 
 private:
-    int _max_leaf_size = 30;
+    int _max_leaf_size = 64;
 };
 
 } // End namespace diorama

@@ -45,6 +45,27 @@ public:
     }
 };
 
+class PerspectiveCamera2 : public Camera {
+public:
+    double fov1, fov_scale1;
+    double fov2, fov_scale2;
+
+    PerspectiveCamera2(void) { }
+
+    PerspectiveCamera2(const Vector &e, const Vector &f, const Vector &u, double fov1_, double fov2_) {
+        eye = e, front = f, up = u, right = cross(f, u);
+        fov1 = fov1_, fov_scale1 = tan(fov1_ * 0.5 * pi / 180) * 2;
+        fov2 = fov2_, fov_scale2 = tan(fov2_ * 0.5 * pi / 180) * 2;
+    }
+
+    inline virtual Ray generate(double x, double y, RandomStream *rng) {
+        Vector r = right * ((x - 0.5) * fov_scale1);
+        Vector u = up * ((y - 0.5) * fov_scale2);
+        return Ray(eye, (front + r + u).norm());
+    }
+};
+
+
 class DoFCamera : public Camera {
 public:
     double fov, fov_scale, lens_r, focus_distance;

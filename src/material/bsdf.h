@@ -295,6 +295,34 @@ private:
 //    }
 //};
 
+class LambertianSpecularBSDF : public BSDF {
+public:
+    LambertianSpecularBSDF(VectorTexture *const reflectance, double diff) : BSDF(reflectance), _diff(diff) { }
+
+    virtual void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,
+                        Ray &out, double &pdf) const override {
+
+        if (rng->get() < _diff) {
+            Vector abs_norm = (dot(norm, in.direct) < 0) ? norm : norm * -1;
+            out.origin = pos;
+            out.direct = rng->sample_hemisphere(abs_norm);
+            pdf = 1;
+        } else {
+            out.origin = pos;
+            out.direct = reflect(in.direct, norm);
+            pdf = 1;
+        }
+    }
+    virtual double pdf(const Ray &in, const Vector &norm, const Ray &out) const override {
+        return dot(norm, out.direct) * inv_pi;
+    }
+
+    virtual BSDFType get_type() const override { return BSDFType::Lambertian | BSDFType::Specular ; }
+
+private:
+    double _diff;
+};
+
 } // End namespace diorama
 
 #endif //RAYTRACE_MTLDETAIL_H

@@ -118,15 +118,19 @@ class Plane : public Object {
 public:
     Vector point, norm;
     double d;
+    BumpTexture *bump;
 
-    Plane(void) { }
+    Plane(void) : bump(NULL) { }
 
-    Plane(const Vector &p, const Vector &n) : point(p), norm(n) {
+    Plane(const Vector &p, const Vector &n) : point(p), norm(n), bump(NULL) {
         initialize();
     }
 
     inline void initialize(void) {
         d = -dot(point, norm);
+    }
+    inline void set_bump(BumpTexture *const bump_) {
+        bump = bump_;
     }
 
     virtual Intersection intersect(const Ray &ray);

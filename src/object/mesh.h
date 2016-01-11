@@ -59,7 +59,7 @@ public:
 
     }
 
-    static TriangleMesh *from_stream(std::istream &f, Material *material, const Vector &resize, const Vector &delta);
+    static TriangleMesh *from_stream(std::istream &f, Material *material, const Vector &resize, const Vector &delta, bool flip_normal = false);
 
 private:
     triangle_vec_t _triangles;
