@@ -80,7 +80,7 @@ void make_scene(Scene *scene, Scene *light, Camera *&camera) {
 
     ifstream kitten_f("models/kitten.50k.obj", ios::in);
     TriangleMesh *kitten = TriangleMesh::from_stream(
-        kitten_f, new LambertianBRDF(Vector(0.75, 0.25, 0.25)),
+        kitten_f, new BTDF(Vector(0.99, 0.999, 0.99)),
         Vector(0.12, 0.12, 0.12), Vector(-1.75, -9.6, 2.5));
     kitten_f.close();
     ObjKDTree *kitten_kd = new ObjKDTree(kitten);
@@ -91,9 +91,8 @@ void make_scene(Scene *scene, Scene *light, Camera *&camera) {
         glass_f, new LambertianBRDF(Vector(0.75, 0.75, 0.75)),
         Vector(0.12, 0.12, 0.12), Vector(3, -10, 10.5));
     glass_f.close();
-    cerr << "read finished" << endl;
     ObjKDTree *glass_kd = new ObjKDTree(glass);
-    glass_kd->add_to_scene(scene);
+//    glass_kd->add_to_scene(scene);
 
     camera = new PerspectiveCamera(Vector(0.0, 0.0, 100.0), Vector(0, 0, -1).norm(), Vector(0, 1, 0), 20);
 //    camera = new DoFCamera(Vector(0.0, 0.0, 100.0), Vector(0, 0, -1).norm(), Vector(0, 1, 0), 20, 1, 80);
