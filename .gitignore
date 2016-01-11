@@ -6,5 +6,6 @@
 bin/
 obj/
 test/
+models/
 src.bak/
 .idea/
