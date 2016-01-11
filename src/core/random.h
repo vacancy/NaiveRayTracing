@@ -18,6 +18,9 @@ namespace diorama {
 class RandomStream {
 public:
     virtual double get() = 0;
+    virtual ~RandomStream() {
+
+    }
 
     inline Vector sample_hemisphere(const Vector &norm) {
         double r1 = 2 * pi * get();
@@ -74,6 +77,22 @@ public:
         result.direct = norm;
         return result;
     }
+
+//    inline Ray sample_cos_hemisphere(const Vector &pos, const Vector &norm) {
+//        double r0 = sqrt(get());
+//        double r1 = get() * (2.0 * pi);
+//        double rx = r * r0 * cos(r1);
+//        double ry = r * r0 * sin(r1);
+//
+//        Vector w = norm;
+//        Vector wo = w.x < -0.1 || w.x > 0.1 ? Vector::YAxis : Vector::XAxis;
+//        Vector u = cross(wo, w).norm();
+//        Vector v = cross(w, u);
+//
+//        Ray result;
+//        result.origin = pos;
+//        result.direct = Vector(norm * sqrt(std::max(0., 1. - sqr(rx) - sqr(ry))) + rx * u + ry * v);
+//    }
 };
 
 class LCGStream : public RandomStream {

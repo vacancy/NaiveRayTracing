@@ -35,28 +35,11 @@ void PhotonMap::initialize() {
             double pdf;
             object->sample(rng, light, pdf);
 
-            Vector flux = object->material->emission * pi / pdf / PHOTON_SAMPLE;
+            Vector flux = object->light->get_emission(light.origin, light.direct) * pi / pdf / PHOTON_SAMPLE;
             light.direct = rng->sample_hemisphere(light.direct);
 
             trace(light, flux, 0, PhotonState::Direct, rng);
-
-//            if (_global.wrapper.size() >= PHOTON_GLOBAL && !finished_global) {
-//                for (Photon *photon : _global.wrapper)
-//                    photon->flux = photon->flux / double(i);
-//                finished_global = true;
-//            }
-
-//            if (_caustic.wrapper.size() >= PHOTON_CAUSTIC && !finished_caustic) {
-//                for (Photon *photon : _caustic.wrapper)
-//                    photon->flux = photon->flux / double(i);
-//                finished_caustic = true;
-//            }
-
-//            if (_global.wrapper.size() >= PHOTON_GLOBAL && _caustic.wrapper.size() >= PHOTON_CAUSTIC)
-//                break;
         }
-//        if (_global.wrapper.size() >= PHOTON_GLOBAL && _caustic.wrapper.size() >= PHOTON_CAUSTIC)
-//            break;
     }
     delete rng;
 
@@ -73,34 +56,6 @@ Vector PhotonMap::sample(const Vector &position, const Vector &norm, int global_
     find_knn(query, global_n, global_r, caustic_n, caustic_r, global_result, caustic_result);
 
     Vector flux = Vector::Zero;
-
-//    double max_dis2 = 0.;
-//    for (Photon *photon : global_result) {
-//        double dis2 = (position - *photon).l2();
-//        if (dis2 > max_dis2) max_dis2 = dis2;
-//    }
-//    if (max_dis2 > eps) {
-//        for (Photon *photon : global_result) {
-//            double dis2 = (position - *photon).l2();
-//            double s = 1 - dis2 / max_dis2;
-//            double k = 3.f * inv_pi * s * s;
-//            flux += k / max_dis2 * photon->flux;
-//        }
-//    }
-
-//    max_dis2 = 0.;
-//    for (Photon *photon : caustic_result) {
-//        double dis2 = (position - *photon).l2();
-//        if (dis2 > max_dis2) max_dis2 = dis2;
-//    }
-//    if (max_dis2 > eps) {
-//        for (Photon *photon : caustic_result) {
-//            double dis2 = (position - *photon).l2();
-//            double s = 1 - dis2 / max_dis2;
-//            double k = 3.f * inv_pi * s * s;
-//            flux += k / max_dis2 * photon->flux;
-//        }
-//    }
 
     photon_vec_t valid;
 
@@ -136,21 +91,11 @@ void PhotonMap::find_knn(const Photon &center, int global_n, double global_r, in
                          photon_vec_t &global_result, photon_vec_t &caustic_result) {
 
     photon_vec_t result1 = _global.find_knn(center, global_r, global_n);
-//    photon_vec_t result2 = _caustic.find_r(center, caustic_r);
-
-//    if (result1.size() > global_n)
-//        std::sort(result1.begin(), result1.end(), PhotonDistanceCompare(center));
-//    if (result2.size() > caustic_n)
-//        std::sort(result2.begin(), result2.end(), PhotonDistanceCompare(center));
 
     for (int i = 0; i < min(global_n, static_cast<int>(result1.size())); ++i) {
         result1[i]->flux = result1[i]->flux * PHOTON_GLOBAL_MUL;
         global_result.push_back(result1[i]);
     }
-//    for (int i = 0; i < min(caustic_n, static_cast<int>(result2.size())); ++i) {
-//        result2[i]->flux = result2[i]->flux * PHOTON_CAUSTIC_MUL;
-//        caustic_result.push_back(result2[i]);
-//    }
 }
 
 void PhotonMap::trace(const Ray &ray, const Vector &flux, int depth, PhotonState state, RandomStream *rng) {
@@ -159,28 +104,24 @@ void PhotonMap::trace(const Ray &ray, const Vector &flux, int depth, PhotonState
 
     Intersection inter = _scene->intersect(ray);
     if (inter.object == NULL) return ;
+    if (inter.object->is_light) return ;
 
     int new_depth = depth + 1;
 
     Object *object = inter.object;
-    BSDF *material = static_cast<BSDF *>(object->material);
-
-    Vector current_flux = material->color;
-    Vector norm = inter.norm;
+    Material *material = object->material;
     Vector pos = inter.position;
-    Vector trace_res = Vector::Zero;
+    Vector norm = inter.norm;
+
+    BSDF *bsdf = material->get_bsdf(pos, norm);
+    Vector reflectance = bsdf->get_reflectance(pos, norm);
 
     double photon_pdf = 1.0;
-    if (material->get_type() & BSDFType::Scatter) {
-//        if (state == PhotonState::Caustic) {
-//            if (_caustic.wrapper.size() < PHOTON_CAUSTIC)
-//                _caustic.wrapper.push_back(new Photon(pos, flux, ray.direct));
-//        } else {
-            if (_global.wrapper.size() < PHOTON_GLOBAL)
-                _global.wrapper.push_back(new Photon(pos, flux, ray.direct));
-//        }
+    if (bsdf->get_type() & BSDFType::Scatter) {
+        if (_global.wrapper.size() < PHOTON_GLOBAL)
+            _global.wrapper.push_back(new Photon(pos, flux, ray.direct));
 
-        const double prob = current_flux.mean();
+        const double prob = reflectance.mean();
         if (rng->get() < prob) {
             photon_pdf *= prob;
         } else {
@@ -189,15 +130,10 @@ void PhotonMap::trace(const Ray &ray, const Vector &flux, int depth, PhotonState
     }
 
     PhotonState new_state = state;
-//    if (material->get_type() & BSDFType::Scatter) {
-//        if (state == PhotonState::Caustic) new_state = PhotonState::Indirect;
-//    } else if (material->get_type() & BSDFType::Refractive) {
-//        if (state != PhotonState::Indirect) new_state = PhotonState::Caustic;
-//    }
 
     Ray new_ray; double sample_pdf;
-    material->sample(ray, pos, norm, rng, new_ray, sample_pdf);
-    Vector new_flux = flux * current_flux / (sample_pdf * photon_pdf);
+    bsdf->sample(ray, pos, norm, rng, new_ray, sample_pdf);
+    Vector new_flux = flux * reflectance / (sample_pdf * photon_pdf);
 
     trace(new_ray, new_flux, new_depth, new_state, rng);
 }

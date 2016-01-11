@@ -27,8 +27,15 @@ Vector DepthRenderer::trace(const Ray &ray) {
         return Vector::Zero;
     }
     Object *object = inter.object;
-    Material *material = object->material;
-    return material->color / inter.distance;
+    Vector pos = inter.position;
+    Vector norm = inter.norm;
+
+    if (object->is_light) {
+        return object->light->get_emission(pos, norm) / inter.distance;
+    } else {
+        Material *material = object->material;
+        return material->get_bsdf(pos, norm)->get_reflectance(pos, norm) / inter.distance;
+    }
 }
 
 void DepthRenderer::render(Camera *camera, Canvas *canvas) {

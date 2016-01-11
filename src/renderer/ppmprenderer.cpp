@@ -95,26 +95,30 @@ Vector PPMPRenderer::trace(const Ray &ray, int depth, LCGStream *rng,
     int new_depth = depth + 1;
     bool is_max_depth = new_depth >= _max_depth;
     Object *object = inter.object;
-    BSDF *material = static_cast<BSDF *>(object->material);
+    Vector pos = inter.position;
+    Vector norm = inter.norm;
+
+    if (object->is_light) {
+        return object->light->get_emission(pos, norm);
+    }
+    Material *material = object->material;
+    BSDF *bsdf = material->get_bsdf(pos, norm);
+    Vector reflectance = bsdf->get_reflectance(pos, norm);
 
     bool use_rr = new_depth > 5;
-    bool roulette = use_rr && rng->get() < material->max_color;
-
+    bool roulette = use_rr && rng->get() < reflectance.max();
     if (is_max_depth || (use_rr && !roulette)) {
-        return material->emission;
+        return Vector::Zero;
     }
-    Vector flux = material->color;
-    Vector norm = inter.norm;
-    Vector pos = inter.position;
-    Vector radiance = Vector::Zero;
 
-    if (material->get_type() & BSDFType::Scatter) {
+    Vector radiance = Vector::Zero;
+    if (bsdf->get_type() & BSDFType::Scatter) {
         radiance = _photon_map->sample(pos, norm, global_n, global_r, caustic_n, caustic_r);
     }
 
-    if (material->get_type() & BSDFType::Dielectric){
-        if (material->get_type() == BSDFType::Refractive && new_depth < 5) {
-            BTDF *btdf = static_cast<BTDF *>(material);
+    if (bsdf->get_type() & BSDFType::Dielectric){
+        if (bsdf->get_type() == BSDFType::Refractive && new_depth < 5) {
+            RefractiveBTDF *btdf = static_cast<RefractiveBTDF *>(bsdf);
             Ray new_ray1, new_ray2; double pdf1, pdf2;
             btdf->sample(ray, pos, norm, rng, new_ray1, pdf1, 1);
             btdf->sample(ray, pos, norm, rng, new_ray2, pdf2, 2);
@@ -122,12 +126,12 @@ Vector PPMPRenderer::trace(const Ray &ray, int depth, LCGStream *rng,
             if (pdf2 > bigeps) radiance += trace(new_ray2, new_depth, rng, global_n, global_r, caustic_n, caustic_r) * pdf2;
         } else {
             Ray new_ray; double pdf = 1.0;
-            material->sample(ray, pos, norm, rng, new_ray, pdf);
+            bsdf->sample(ray, pos, norm, rng, new_ray, pdf);
             radiance = trace(new_ray, new_depth, rng, global_n, global_r, caustic_n, caustic_r) / pdf;
         }
     }
 
-    return material->emission + flux * radiance;
+    return reflectance * radiance;
 }
 
 

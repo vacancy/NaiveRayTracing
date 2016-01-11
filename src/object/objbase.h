@@ -82,17 +82,25 @@ public:
 
 class Object {
 public:
-    Material *material;
+    union {
+        Material *material;
+        Light *light;
+    };
+    bool is_light;
 
-    Object(void) : material(NULL) {
+    Object(void) : material(NULL), is_light(false) {
 
     }
 
     virtual Intersection intersect(const Ray &ray) { return Intersection::null; }
     virtual void sample(RandomStream *rng, Ray &ray, double &pdf) = 0;
 
-    inline Object *set_material(Material *m) {
-        material = m;
+    inline Object *set_material(Material *const m) {
+        material = m, is_light = false;
+        return this;
+    }
+    inline Object *set_light(Light *const l) {
+        light = l, is_light = true;
         return this;
     }
 

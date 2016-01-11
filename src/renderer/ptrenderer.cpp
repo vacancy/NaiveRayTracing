@@ -65,24 +65,31 @@ Vector PTRenderer::trace(const Ray &ray, int depth, LCGStream *rng) {
 
     int new_depth = depth + 1;
     bool is_max_depth = new_depth >= _max_depth;
+
     Object *object = inter.object;
+    Vector pos = inter.position;
+    Vector norm = inter.norm;
+
+    if (object->is_light) {
+        return object->light->get_emission(pos, norm);
+    }
+
     Material *material = object->material;
+    BSDF *bsdf = material->get_bsdf(pos, norm);
+    Vector reflectance = bsdf->get_reflectance(pos, norm);
 
     bool use_rr = new_depth > 5;
-    bool roulette = use_rr && rng->get() < material->max_color;
-
+    bool roulette = use_rr && rng->get() < reflectance.max();
     if (is_max_depth || (use_rr && !roulette)) {
-        return material->emission;
+        return Vector::Zero;
     }
-    Vector flux = (use_rr && roulette) ? material->normed_color : material->color;
-    Vector norm = inter.norm;
-    Vector pos = inter.position;
 
-    Ray new_ray;
-    double pdf;
-    material->sample(ray, pos, norm, rng, new_ray, pdf);
+    Vector flux = (use_rr && roulette) ? reflectance / reflectance.max() : reflectance;
 
-    return material->emission + flux * trace(new_ray, new_depth, rng) / pdf;
+    Ray new_ray; double pdf;
+    bsdf->sample(ray, pos, norm, rng, new_ray, pdf);
+
+    return flux * trace(new_ray, new_depth, rng) / pdf;
 }
 
 } // End namespace diorama
