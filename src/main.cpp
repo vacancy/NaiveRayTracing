@@ -215,12 +215,12 @@ void make_scene_dof(Scene *scene, Scene *lt, Camera *&camera) {
     camera = new DoFCamera(Vector(0, 1, -13.75), Vector(0, -.1, 1).norm(), Vector(0, 1, 0), 30, 0.034, 11.25);
 }
 
-void big_helper(Scene *scene, string filename, Material *mat, bool flip_norm=true) {
+void big_helper(Scene *scene, string filename, Material *mat, bool flip_norm=true, int kd_leaf_size=64) {
     ifstream f(filename, ios::in);
     TriangleMesh *mesh = TriangleMesh::from_stream(f, mat, Vector(1, 1, 1), Vector::Zero, flip_norm);
     f.close();
 //    mesh->add_to_scene(scene);
-    ObjKDTree *kd = new ObjKDTree(mesh, 64);
+    ObjKDTree *kd = new ObjKDTree(mesh, kd_leaf_size);
     kd->add_to_scene(scene);
 }
 void make_scene_big(Scene *scene, Scene *light, Camera *&camera) {
@@ -243,7 +243,7 @@ void make_scene_big(Scene *scene, Scene *light, Camera *&camera) {
     big_helper(scene, "models/4.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(52./255, 86./255, 22./255)))));
     big_helper(scene, "models/5.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(102./255, 123./255, 142./255)))));
     big_helper(scene, "models/6.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(102./255, 123./255, 142./255)))));
-//    big_helper(scene, "models/12.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(72./255, 54./255, 23./255)))));
+    big_helper(scene, "models/12.obj", new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(72./255, 54./255, 23./255)))), true, 512);
 
     {
         Vector l00(16.0721, 99.4089, -73.0000);
