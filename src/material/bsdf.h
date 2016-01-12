@@ -53,7 +53,6 @@ public:
     }
     virtual void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,
                         Ray &out, double &pdf) const = 0;
-    virtual double pdf(const Ray &in, const Vector &norm, const Ray &out) const = 0;
 
     virtual Vector get_reflectance(const Vector &pos, const Vector &norm) const {
         return _reflectance->get(pos, norm);
@@ -86,9 +85,6 @@ public:
         out.direct = rng->sample_hemisphere(abs_norm);
         pdf = 1;
     }
-    virtual double pdf(const Ray &in, const Vector &norm, const Ray &out) const override {
-        return dot(norm, out.direct) * inv_pi;
-    }
 
     virtual BSDFType get_type() const override { return BSDFType::Lambertian; }
 };
@@ -103,12 +99,6 @@ public:
         out.origin = pos;
         out.direct = reflect(in.direct, norm);
         pdf = 1;
-    }
-    virtual double pdf(const Ray& in, const Vector& norm, const Ray& out) const override {
-        Vector refl = reflect(in.direct, norm);
-        if (dot(refl, out.direct) > (1.0 - eps))
-            return 1.0;
-        return 0.0;
     }
 
     virtual BSDFType get_type() const override { return BSDFType::Specular; }
@@ -137,12 +127,6 @@ public:
         pdf = 1.0;
         out.origin = pos;
         out.direct = (u * sin(theta) * cos(phi) + w * cos(theta) + v * sin(theta) * sin(phi)).norm();
-    }
-
-    virtual double pdf(const Ray& in, const Vector& norm, const Ray& out) const override {
-        Vector refl = reflect(in.direct, norm);
-        double cosine = std::max(0.0, dot(refl, out.direct));
-        return (_coeff + 1.0) / (2.0 * pi) * pow(cosine, _coeff);
     }
 
     virtual BSDFType get_type() const override { return BSDFType::Phong; }
@@ -211,70 +195,11 @@ public:
             }
         }
     }
-    double pdf(const Ray &in, const Vector &norm, const Ray &out) const override {
-        return 1;
-//        Vector abs_norm = in.dot(normal) < 0.0 ? normal : -normal;
-//        bool into = normal.dot(abs_norm) > 0.0;
-//
-//        Vector3D reflectdir, transmitdir;
-//        double Re, Tr;
-//        const bool total_reflection =
-//            helper::checkTotalReflection(into, in,
-//                                         normal, orientN,
-//                                         &reflectdir, &transmitdir,
-//                                         &fresnelRe, &fresnelTr);
-//
-//        if (isTotalReflectance) {
-//            if (Vector3D::dot(reflectdir, out) > (1.0 - EPS)) {
-//                return 1.0;
-//            }
-//            return 0.0;
-//        } else {
-//            if (Vector3D::dot(reflectdir, out) > (1.0 - EPS)) {
-//                return 1.0 / fresnelRe;
-//            } else if (Vector3D::dot(transmitdir, out) > (1.0 - EPS)) {
-//                return 1.0 / fresnelTr;
-//            }
-//            return 0.0;
-//        }
-    }
 
     virtual BSDFType get_type() const override { return BSDFType::Refractive; }
 
 private:
     double _beta;
-};
-
-class BlinnBRDF : BSDF {
-public:
-    BlinnBRDF(VectorTexture *const reflectance, double e) : BSDF(reflectance), _e(e) {
-
-    }
-
-    double D(const Vector &wh, const Vector &norm) const {
-        float costhetah = abs(dot(wh, norm));
-        return (_e+2) * 0.5 * inv_pi * pow(costhetah, _e);
-    }
-
-    virtual void sample(const Ray &in, const Vector &pos, const Vector &norm, RandomStream *rng,
-                        Ray &out, double &pdf) const override {
-        // Compute sampled half-angle vector $\wh$ for Blinn distribution
-        float costheta = pow(rng->get(), 1.f / (_e + 1));
-        float sintheta = sqrt(max(0.f, 1.f - costheta * costheta));
-        float phi = rng->get() * 2.f * pi;
-
-        Vector wh = make_spherical(norm, phi, costheta, sintheta);
-        if (dot(in.direct, wh) < 0) wh = -wh;
-
-        out.origin = pos;
-        out.direct = -in.direct + 2.f * dot(in.direct, wh) * wh;
-
-        float blinn_pdf = ((_e + 1.f) * pow(costheta, _e)) / (2.f * pi * 4.f * dot(in.direct, wh));
-        if (dot(in.direct, wh) <= 0.f) blinn_pdf = 0.f;
-        pdf = blinn_pdf;
-    }
-private:
-    double _e;
 };
 
 //class MonteCaloSamplingBSDF : BSDF {
@@ -312,9 +237,6 @@ public:
             out.direct = reflect(in.direct, norm);
             pdf = 1;
         }
-    }
-    virtual double pdf(const Ray &in, const Vector &norm, const Ray &out) const override {
-        return dot(norm, out.direct) * inv_pi;
     }
 
     virtual BSDFType get_type() const override { return BSDFType::Lambertian | BSDFType::Specular ; }

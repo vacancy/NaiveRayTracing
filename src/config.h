@@ -10,13 +10,13 @@
 #ifndef _INCLUDE_CONFIG_H_
 #define _INCLUDE_CONFIG_H_
 
-const int SAMPLE_X = 1;
-const int SAMPLE_Y = 1;
-const int SAMPLE = 250;
+const int SAMPLE_X = 2;
+const int SAMPLE_Y = 2;
+const int SAMPLE = 40;
 const int SAMPLE_XY = SAMPLE_X * SAMPLE_Y;
 const int SAMPLE_ALL = SAMPLE * SAMPLE_XY;
 
-const int PHOTON_SAMPLE = 1000000;
+const int PHOTON_SAMPLE = 2000000;
 const int PHOTON_GLOBAL  = 100000000;
 const int PHOTON_CAUSTIC = 0;
 
