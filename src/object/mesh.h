@@ -2,7 +2,7 @@
  * File   : mesh
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : $YEAR-$MONTH-07 13:16
+ * Date   : 2016-$MONTH-07 13:16
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/

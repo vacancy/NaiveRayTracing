@@ -2,7 +2,7 @@
  * File   : veckd
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : $YEAR-$MONTH-07 12:41
+ * Date   : 2016-$MONTH-07 12:41
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/

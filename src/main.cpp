@@ -229,8 +229,8 @@ void make_scene_big(Scene *scene, Scene *light, Camera *&camera) {
     floor->set_bump(new BumpTexture("models/Chene_huile_naturel_bump.jpg", Vector(-200, -50, 0), Vector(1, 0, 0), Vector(0, 0, -1), 20, 20, 2.2, 0.1));
     floor->add_to_scene(scene);
     Plane *wall = new Plane(Vector(0, 0, -76), Vector(0, 0, 1));
-//    wall->set_material(new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(0.2078, 0.3922, 0.3647)))));
-    wall->set_material(new SimpleMaterial(new LambertianBRDF(new BmpTexture("models/wall1.jpg", Vector(-118, -3.937, -78), Vector(1, 0, 0), Vector(0, 1, 0), 4, 4, 2.2))));
+    wall->set_material(new SimpleMaterial(new LambertianBRDF(new ConstantTexture<Vector>(Vector(0.2078, 0.3922, 0.3647)))));
+//    wall->set_material(new SimpleMaterial(new LambertianBRDF(new BmpTexture("models/wall1.jpg", Vector(-118, -3.937, -78), Vector(1, 0, 0), Vector(0, 1, 0), 4, 4, 2.2))));
     wall->set_bump(new BumpTexture("models/AS2_cloth_10_bump.jpg", Vector(0, 0, -76), Vector(1, 0, 0), Vector(0, -1, 0), 20, 20, 2.2, 0.1));
     wall->add_to_scene(scene);
 

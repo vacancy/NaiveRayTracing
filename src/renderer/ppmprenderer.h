@@ -2,7 +2,7 @@
  * File   : ppmprenderer
  * Author : Jiayuan Mao
  * Email  : mjy14@mails.tsinghua.edu.cn
- * Date   : $YEAR-$MONTH-08 11:58
+ * Date   : 2016-$MONTH-08 11:58
  * This file is part of the school project RayTracing of course
  * ``Advanced Computational Geometry''.
  **/
