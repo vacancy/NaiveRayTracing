@@ -1,10 +1,11 @@
 #
-# $File: Makefile
-# $Date: Fri Sep 12 22:51:24 2014 +0800
-#
-# A single output portable Makefile for
-# simple c++ project
-
+# File   : Makefile
+# Author : Jiayuan Mao
+# Email  : mjy14@mails.tsinghua.edu.cn
+# Date   : 2016-01-02 18:23:12
+# This file is part of the school project RayTracing of course
+# ``Advanced Computational Geometry''.
+# This file is a output portable Makefile for simple c++ project.
 
 SRC_DIR = src
 INC_DIR = include
@@ -21,12 +22,12 @@ BIN_TARGET = $(BIN_DIR)/$(TARGET)
 
 INCLUDE_DIR = -I $(SRC_DIR) -I $(SRC_DIR)/include -I $(INC_DIR)
 
-
 CXXFLAGS = -O3 -w
 # CXXFLAGS = -O3 -w -fopenmp
 # CXXFLAGS = -g
 # CXXFLAGS = -pg
-
+# CXXFLAGS += -shared
+# CXXFLAGS += -fPIC
 
 #CXXFLAGS += $(DEFINES)
 CXXFLAGS += -std=c++11
@@ -34,19 +35,14 @@ CXXFLAGS += -std=c++11
 #CXXFLAGS += -Wall -Wextra
 CXXFLAGS += $(INCLUDE_DIR)
 #CXXFLAGS += $(LDFLAGS)
-CXXFLAGS += $(shell pkg-config --libs --cflags opencv)
+#CXXFLAGS += $(shell pkg-config --libs --cflags opencv)
 #CXXFLAGS += -pthread -lpthread
 #CXXFLAGS += -lopencv_core -lopencv_highgui -lopencv_imgproc
 #CXXFLAGS += `pkg-config --libs --cflags hdf5` -lhdf5_hl -lhdf5_cpp
 
-# CXXFLAGS += -fPIC
-
-
-#CC = /usr/share/clang/scan-build/ccc-analyzer
-#CXX = /usr/share/clang/scan-build/c++-analyzer
 CXXSOURCES = $(shell find $(SRC_DIR)/ -name "*.cpp")
-OBJS = $(addprefix $(OBJ_DIR)/,$(CXXSOURCES:.cpp=.o))
-DEPFILES = $(OBJS:.o=.d)
+OBJFILES = $(addprefix $(OBJ_DIR)/,$(CXXSOURCES:.cpp=.o))
+DEPFILES = $(OBJFILES:.o=.d)
 
 .PHONY: all clean run rebuild gdb
 
@@ -66,10 +62,10 @@ $(OBJ_DIR)/%.d: %.cpp
 
 sinclude $(DEPFILES)
 
-$(BIN_TARGET): $(OBJS)
+$(BIN_TARGET): $(OBJFILES)
 	@echo "[link] $< ..."
 	@mkdir -p $(BIN_DIR)
-	$(CXX) $(OBJS) -o $@ $(CXXFLAGS)
+	$(CXX) $(OBJFILES) -o $@ $(CXXFLAGS)
 	@echo have a nice day!
 
 clean:
@@ -84,3 +80,4 @@ rebuild:
 
 gdb: $(BIN_TARGET)
 	gdb ./$(BIN_TARGET)
+
