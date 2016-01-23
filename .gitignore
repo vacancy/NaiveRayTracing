@@ -1,8 +1,7 @@
 .DS_Store
 *.txt
-*.bmp
-*.obj
-*.mtl
+models/
+outputs/
 bin/
 obj/
 test/
